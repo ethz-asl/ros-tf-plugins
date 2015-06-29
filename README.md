@@ -13,7 +13,7 @@ working with ROS TF frames:
 
 ### Static TF Plugin for rqt
 
-[Static TF Plugin for rqt](rqt_static_tf.png)
+![Static TF Plugin for rqt](rqt_static_tf.png)
 
 ## Installation
 
