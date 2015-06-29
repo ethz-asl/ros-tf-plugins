@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>rqt_static_tf</name>
+  <version>0.0.1</version>
+  <description>
+    rqt_static_tf provides a GUI plugin for visualizing and modifying
+    ROS static tf frames.
+  </description>
+  <maintainer email="ralf.kaestner@gmail.com">Ralf Kaestner</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_msgs</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rqt_gui</build_depend>
+  <build_depend>rqt_gui_cpp</build_depend>
+  
+  <run_depend>tf2</run_depend>
+  <run_depend>tf2_msgs</run_depend>
+  <run_depend>tf2_ros</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rqt_gui</run_depend>
+  <run_depend>rqt_gui_cpp</run_depend>
+  
+  <export>
+    <architecture_independent/>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

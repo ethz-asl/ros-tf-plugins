@@ -1,0 +1,19 @@
+<library path="lib/librqt_static_tf">
+  <class name="StaticTfPlugin" type="StaticTfPlugin"
+      base_class_type="rqt_gui_cpp::Plugin">
+    <description>
+      A GUI plugin for visualizing and modifying ROS static tf frames.
+    </description>
+    <qtgui>
+      <group>
+        <label>TF</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to ROS tf frames</statustip>
+      </group>
+      <label>Static TF</label>
+      <statustip>
+        A GUI plugin for visualizing and modifying ROS static tf frames.
+      </statustip>
+    </qtgui>
+  </class>
+</library>
