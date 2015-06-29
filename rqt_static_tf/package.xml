@@ -7,7 +7,7 @@
     ROS static tf frames.
   </description>
   <maintainer email="ralf.kaestner@gmail.com">Ralf Kaestner</maintainer>
-  <license>BSD</license>
+  <license>GNU Lesser General Public License (LGPL)</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   
