@@ -2,9 +2,8 @@
 
 ## Overview
 
-**Author(s): Ralf Kaestner**
-
-**Affiliation: Autonomous Systems Lab, ETH Zurich**
+**Author(s): Ralf Kaestner</br>
+Affiliation: Autonomous Systems Lab, ETH Zurich**
 
 ## Content
 
