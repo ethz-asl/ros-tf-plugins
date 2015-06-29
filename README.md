@@ -6,6 +6,15 @@
 
 **Affiliation: Autonomous Systems Lab, ETH Zurich**
 
+## Content
+
+This project contains the follwing GUI plugins which may be useful when
+working with ROS TF frames:
+
+### Static TF Plugin for rqt
+
+[![Static TF Plugin for rqt](rqt_static_tf.png)]
+
 ## Installation
 
 ### Dependencies
