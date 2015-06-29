@@ -71,4 +71,4 @@ To delete the default configuration files (in case of problems):
 ## Bugs & Feature Requests
 
 Please report bugs and feature requests on the
-[Issue Tracker](https://github.org/ethz-asl/tf-plugins).
+[Issue Tracker](https://github.com/ethz-asl/tf-plugins).
