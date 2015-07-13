@@ -1,3 +1,9 @@
+tf-plugins (0.0.1-5) unstable; urgency=low
+
+  * First incomplete draft version of rviz TF Marker
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 13 Jul 2015 17:23:00 +0100
+ 
 tf-plugins (0.0.1-4) unstable; urgency=low
 
   * Increased field precision for translation values

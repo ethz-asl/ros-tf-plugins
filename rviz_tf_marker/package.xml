@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+  <name>rviz_tf_marker</name>
+  <version>0.0.1</version>
+  <description>
+    rviz_tf_marker provides a GUI plugin for reading and publishing poses
+    with respect to ROS frames.
+  </description>
+  <maintainer email="ralf.kaestner@gmail.com">Ralf Kaestner</maintainer>
+  <license>GNU Lesser General Public License (LGPL)</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_msgs</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rviz</build_depend>
+  
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>tf2</run_depend>
+  <run_depend>tf2_msgs</run_depend>
+  <run_depend>tf2_ros</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>rviz</run_depend>
+  
+  <export>
+    <architecture_independent/>
+    <rviz plugin="${prefix}/plugin.xml"/>
+  </export>
+</package>

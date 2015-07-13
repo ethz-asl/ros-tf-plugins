@@ -39,11 +39,13 @@
 
 #include <ui_static_tf_plugin.h>
 
-class StaticTfPlugin :
+namespace rqt_static_tf {
+
+class StaticTFPlugin :
   public rqt_gui_cpp::Plugin {
 Q_OBJECT
 public:
-  StaticTfPlugin();
+  StaticTFPlugin();
   
   void initPlugin(qt_gui_cpp::PluginContext& context);
   void shutdownPlugin();
@@ -80,6 +82,8 @@ private:
   void setEnabledForAll(bool enabled);
   void lookupTransform();
   void publishTransform();
+};
+
 };
 
 #endif

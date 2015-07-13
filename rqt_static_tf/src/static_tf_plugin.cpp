@@ -30,26 +30,27 @@
 
 #include "static_tf_plugin.h"
 
-PLUGINLIB_DECLARE_CLASS(rqt_static_tf, StaticTfPlugin, \
-  StaticTfPlugin, rqt_gui_cpp::Plugin)
+PLUGINLIB_EXPORT_CLASS(rqt_static_tf::StaticTFPlugin, rqt_gui_cpp::Plugin)
+
+namespace rqt_static_tf {
 
 /*****************************************************************************/
 /* Constructors and Destructor                                               */
 /*****************************************************************************/
 
-StaticTfPlugin::StaticTfPlugin() :
+StaticTFPlugin::StaticTFPlugin() :
   rqt_gui_cpp::Plugin(),
   widget_(0),
   tfListener(tfBuffer),
   block(false) {
-  setObjectName("StaticTfPlugin");
+  setObjectName("StaticTFPlugin");
 }
 
 /*****************************************************************************/
 /* Methods                                                                   */
 /*****************************************************************************/
 
-void StaticTfPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
+void StaticTFPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
   QStringList argv = context.argv();
 
   widget_ = new QWidget();
@@ -103,18 +104,18 @@ void StaticTfPlugin::initPlugin(qt_gui_cpp::PluginContext& context) {
   setEnabledForAll(false);
 }
 
-void StaticTfPlugin::shutdownPlugin() {
+void StaticTFPlugin::shutdownPlugin() {
 }
 
-void StaticTfPlugin::saveSettings(qt_gui_cpp::Settings& plugin_settings,
+void StaticTFPlugin::saveSettings(qt_gui_cpp::Settings& plugin_settings,
     qt_gui_cpp::Settings& instance_settings) const {
 }
 
-void StaticTfPlugin::restoreSettings(const qt_gui_cpp::Settings&
+void StaticTFPlugin::restoreSettings(const qt_gui_cpp::Settings&
     plugin_settings, const qt_gui_cpp::Settings& instance_settings) {
 }
 
-void StaticTfPlugin::buttonRefreshPressed() {
+void StaticTFPlugin::buttonRefreshPressed() {
   std::vector<std::string> frames;
   tfBuffer._getFrameStrings(frames);
   
@@ -151,7 +152,7 @@ void StaticTfPlugin::buttonRefreshPressed() {
     childFrameItem : 0);
 }
 
-void StaticTfPlugin::comboBoxParentFrameIndexChanged(const
+void StaticTFPlugin::comboBoxParentFrameIndexChanged(const
     QString& text) {
   std::string parentFrame = text.toStdString();
   QString oldChildFrame = ui_.comboBoxChildFrame->currentText();
@@ -171,12 +172,12 @@ void StaticTfPlugin::comboBoxParentFrameIndexChanged(const
     childFrameItem : 0);
 }
 
-void StaticTfPlugin::comboBoxChildFrameIndexChanged(const
+void StaticTFPlugin::comboBoxChildFrameIndexChanged(const
     QString& text) {
   lookupTransform();
 }
 
-void StaticTfPlugin::buttonCopyPressed() {
+void StaticTFPlugin::buttonCopyPressed() {
   std::string parentFrame =
     ui_.comboBoxParentFrame->currentText().toStdString();
   std::string childFrame =
@@ -202,13 +203,13 @@ void StaticTfPlugin::buttonCopyPressed() {
   }
 }
 
-void StaticTfPlugin::doubleSpinBoxTranslationValueChanged(
+void StaticTFPlugin::doubleSpinBoxTranslationValueChanged(
     double value) {
   if (!block)
     publishTransform();
 }
 
-void StaticTfPlugin::doubleSpinBoxRotationEulerValueChanged(
+void StaticTFPlugin::doubleSpinBoxRotationEulerValueChanged(
     double value) {
   if (!block) {
     double x = ui_.doubleSpinBoxRotationEulerX->value();
@@ -237,7 +238,7 @@ void StaticTfPlugin::doubleSpinBoxRotationEulerValueChanged(
   }
 }
 
-void StaticTfPlugin::doubleSpinBoxRotationQuatValueChanged(
+void StaticTFPlugin::doubleSpinBoxRotationQuatValueChanged(
     double value) {
   if (!block) {
     Eigen::Quaternionf quat(
@@ -261,7 +262,7 @@ void StaticTfPlugin::doubleSpinBoxRotationQuatValueChanged(
   }
 }
 
-void StaticTfPlugin::pushButtonQuatNormalizePressed() {
+void StaticTFPlugin::pushButtonQuatNormalizePressed() {
   Eigen::Quaternionf quat(
     ui_.doubleSpinBoxRotationQuatW->value(),
     ui_.doubleSpinBoxRotationQuatX->value(),
@@ -281,7 +282,7 @@ void StaticTfPlugin::pushButtonQuatNormalizePressed() {
   publishTransform();
 }
 
-void StaticTfPlugin::comboBoxRotationEulerDegRadIndexChanged(
+void StaticTFPlugin::comboBoxRotationEulerDegRadIndexChanged(
     const QString& text) {
   double minValue = -M_PI;
   double maxValue = M_PI;
@@ -306,7 +307,7 @@ void StaticTfPlugin::comboBoxRotationEulerDegRadIndexChanged(
   lookupTransform();
 }
 
-void StaticTfPlugin::setEnabledForAll(bool enabled) {
+void StaticTFPlugin::setEnabledForAll(bool enabled) {
   ui_.doubleSpinBoxTranslationX->setEnabled(enabled);
   ui_.doubleSpinBoxTranslationY->setEnabled(enabled);
   ui_.doubleSpinBoxTranslationZ->setEnabled(enabled);
@@ -324,7 +325,7 @@ void StaticTfPlugin::setEnabledForAll(bool enabled) {
   ui_.pushButtonQuatNormalize->setEnabled(enabled);
 }
 
-void StaticTfPlugin::lookupTransform() {
+void StaticTFPlugin::lookupTransform() {
   std::string parentFrame =
     ui_.comboBoxParentFrame->currentText().toStdString();
   std::string childFrame =
@@ -374,7 +375,7 @@ void StaticTfPlugin::lookupTransform() {
   }
 }
 
-void StaticTfPlugin::publishTransform() {
+void StaticTFPlugin::publishTransform() {
   std::string parentFrame =
     ui_.comboBoxParentFrame->currentText().toStdString();
   std::string childFrame =
@@ -399,4 +400,6 @@ void StaticTfPlugin::publishTransform() {
     
     broadcaster.sendTransform(message);
   }
+}
+
 }
