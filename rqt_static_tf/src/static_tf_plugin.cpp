@@ -28,7 +28,7 @@
 
 #include <geometry_msgs/TransformStamped.h>
 
-#include "static_tf_plugin.h"
+#include "rqt_static_tf/static_tf_plugin.h"
 
 PLUGINLIB_EXPORT_CLASS(rqt_static_tf::StaticTFPlugin, rqt_gui_cpp::Plugin)
 

@@ -19,12 +19,21 @@
 #ifndef TF_MARKER_DISPLAY_H
 #define TF_MARKER_DISPLAY_H
 
+#ifndef Q_MOC_RUN
+#include <OgreQuaternion.h>
+#include <OgreMatrix3.h>
+#include <OgreVector3.h>
+
 #include <ros/ros.h>
 #include <ros/publisher.h>
 
 #include <geometry_msgs/PoseStamped.h>
 
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+
 #include <rviz/display.h>
+#endif
 
 namespace rviz {
   class BoolProperty;
@@ -48,12 +57,24 @@ namespace rviz_tf_marker {
     
     void setName(const QString& name);
     
+  signals:
+    void initialized();
+  
   protected:
     rviz::BoolProperty* showDescriptionProperty;
+    rviz::ColorProperty* descriptionColorProperty;
     rviz::BoolProperty* showAxesProperty;
     rviz::BoolProperty* showCrosshairProperty;
     rviz::ColorProperty* crosshairColorProperty;
-    rviz::BoolProperty* showVisualAidsProperty;
+    rviz::BoolProperty* showControlsProperty;
+    rviz::BoolProperty* showPositionControlsProperty;
+    rviz::BoolProperty* showXControlsProperty;
+    rviz::BoolProperty* showYControlsProperty;
+    rviz::BoolProperty* showZControlsProperty;
+    rviz::BoolProperty* showOrientationControlsProperty;
+    rviz::BoolProperty* showYawControlsProperty;
+    rviz::BoolProperty* showPitchControlsProperty;
+    rviz::BoolProperty* showRollControlsProperty;
     rviz::Property* poseProperty;
     rviz::RosTopicProperty* topicProperty;
     rviz::TfFrameProperty* frameProperty;
@@ -66,6 +87,12 @@ namespace rviz_tf_marker {
     
     boost::shared_ptr<TFMarker> marker;
     
+    tf2_ros::Buffer tfBuffer;
+    tf2_ros::TransformListener tfListener;
+    ros::Publisher publisher;
+    
+    QString frame;
+    
     bool block;
     
     void onInitialize();
@@ -73,16 +100,45 @@ namespace rviz_tf_marker {
     void onDisable();
     void reset();
     
+    bool transform(const geometry_msgs::PoseStamped& message, 
+      geometry_msgs::PoseStamped& transformedMessage, const
+      QString& targetFrame);
     void publish(const geometry_msgs::PoseStamped& message);
+    
+    void fromMessage(const geometry_msgs::PoseStamped& message);
+    void toMessage(geometry_msgs::PoseStamped& message,
+      const ros::Time& stamp = ros::Time::now());
+    
+    void quaternionToEulerRad(const Ogre::Quaternion& quaternion,
+      Ogre::Vector3& eulerRad);
+    void quaternionToEulerDeg(const Ogre::Quaternion& quaternion,
+      Ogre::Vector3& eulerDeg);
+    void eulerRadToQuaternion(const Ogre::Vector3& eulerRad,
+      Ogre::Quaternion& quaternion);
+    void eulerDegToQuaternion(const Ogre::Vector3& eulerDeg,
+      Ogre::Quaternion& quaternion);
+    void eulerRadToEulerDeg(const Ogre::Vector3& eulerRad,
+      Ogre::Vector3& eulerDeg);
+    void eulerDegToEulerRad(const Ogre::Vector3& eulerDeg,
+      Ogre::Vector3& eulerRad);
     
   protected slots:
     void updateShowDescription();
+    void updateDescriptionColor();
     void updateShowAxes();
     void updateShowCrosshair();
     void updateCrosshairColor();
-    void updateShowVisualAids();
+    void updateShowControls();
+    void updateShowPositionControls();
+    void updateShowXControls();
+    void updateShowYControls();
+    void updateShowZControls();
+    void updateShowOrientationControls();
+    void updateShowYawControls();
+    void updateShowPitchControls();
+    void updateShowRollControls();
     void updatePose();
-    void updatePoseTopic();
+    void updateTopic();
     void updateFrame();
     void updatePosition();
     void updateEulerDeg();

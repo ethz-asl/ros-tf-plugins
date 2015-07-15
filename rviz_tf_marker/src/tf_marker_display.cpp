@@ -16,11 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
  ******************************************************************************/
 
-#include <pluginlib/class_list_macros.h>
-
-#include <OgreMatrix3.h>
 #include <OgreResourceGroupManager.h>
 
+#include <rviz/display_context.h>
+#include <rviz/frame_manager.h>
 #include <rviz/properties/bool_property.h>
 #include <rviz/properties/color_property.h>
 #include <rviz/properties/property.h>
@@ -28,11 +27,16 @@
 #include <rviz/properties/ros_topic_property.h>
 #include <rviz/properties/tf_frame_property.h>
 #include <rviz/properties/vector_property.h>
+#include <rviz/selection/selection_manager.h>
+
+#include <pluginlib/class_list_macros.h>
 
 #include <geometry_msgs/PoseStamped.h>
 
-#include "tf_marker.h"
-#include "tf_marker_display.h"
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include "rviz_tf_marker/tf_marker.h"
+#include "rviz_tf_marker/tf_marker_display.h"
 
 PLUGINLIB_EXPORT_CLASS(rviz_tf_marker::TFMarkerDisplay, rviz::Display)
 
@@ -47,16 +51,26 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::BoolProperty(
       "Show Description",
       true,
-      "Whether or not to show the description of the TF Marker.",
+      "Whether or not to show the description of the TF marker.",
       this,
       SLOT(updateShowDescription())
+    )
+  ),
+  descriptionColorProperty(
+    new rviz::ColorProperty(
+      "Color",
+      Qt::white,
+      "Description color of the TF marker.",
+      showDescriptionProperty,
+      SLOT(updateDescriptionColor()),
+      this
     )
   ),
   showAxesProperty(
     new rviz::BoolProperty(
       "Show Axes",
       false,
-      "Whether or not to show the axes of the TF Marker.",
+      "Whether or not to show the axes of the TF marker.",
       this,
       SLOT(updateShowAxes())
     )
@@ -65,7 +79,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::BoolProperty(
       "Show Crosshair",
       true,
-      "Whether or not to show the crosshair of the TF Marker.",
+      "Whether or not to show the crosshair of the TF marker.",
       this,
       SLOT(updateShowCrosshair())
     )
@@ -74,27 +88,112 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::ColorProperty(
       "Color",
       Qt::white,
-      "Crosshair color of the TF Marker.",
+      "Crosshair color of the TF marker.",
       showCrosshairProperty,
       SLOT(updateCrosshairColor()),
       this
     )
   ),
-  showVisualAidsProperty(
+  showControlsProperty(
     new rviz::BoolProperty(
-      "Show Visual Aids",
-      false,
-      "Whether or not to show visual helpers while moving/rotating the "
-        "TF Marker.",
+      "Show Controls",
+      true,
+      "Whether or not to show controls for moving/rotating the TF marker.",
       this,
-      SLOT(updateShowVisualAids())
+      SLOT(updateShowControls())
+    )
+  ),
+  showPositionControlsProperty(
+    new rviz::BoolProperty(
+      "Position",
+      true,
+      "Whether or not to show controls for moving the TF marker.",
+      showControlsProperty,
+      SLOT(updateShowPositionControls()),
+      this
+    )
+  ),
+  showXControlsProperty(
+    new rviz::BoolProperty(
+      "X",
+      true,
+      "Whether or not to show controls for moving the TF marker "
+        "along the X-axis.",
+      showPositionControlsProperty,
+      SLOT(updateShowXControls()),
+      this
+    )
+  ),
+  showYControlsProperty(
+    new rviz::BoolProperty(
+      "Y",
+      true,
+      "Whether or not to show controls for moving the TF marker "
+        "along the Y-axis.",
+      showPositionControlsProperty,
+      SLOT(updateShowYControls()),
+      this
+    )
+  ),
+  showZControlsProperty(
+    new rviz::BoolProperty(
+      "Z",
+      true,
+      "Whether or not to show controls for moving the TF marker "
+        "along the Z-axis.",
+      showPositionControlsProperty,
+      SLOT(updateShowZControls()),
+      this
+    )
+  ),
+  showOrientationControlsProperty(
+    new rviz::BoolProperty(
+      "Orientation",
+      true,
+      "Whether or not to show controls for rotating the TF marker.",
+      showControlsProperty,
+      SLOT(updateShowOrientationControls()),
+      this
+    )
+  ),
+  showYawControlsProperty(
+    new rviz::BoolProperty(
+      "Yaw",
+      true,
+      "Whether or not to show the control for rotating the TF marker "
+        "about the Z-axis.",
+      showOrientationControlsProperty,
+      SLOT(updateShowYawControls()),
+      this
+    )
+  ),
+  showPitchControlsProperty(
+    new rviz::BoolProperty(
+      "Pitch",
+      true,
+      "Whether or not to show the control for rotating the TF marker "
+        "about the Y-axis.",
+      showOrientationControlsProperty,
+      SLOT(updateShowPitchControls()),
+      this
+    )
+  ),
+  showRollControlsProperty(
+    new rviz::BoolProperty(
+      "Roll",
+      true,
+      "Whether or not to show the control for rotating the TF marker "
+        "about the X-axis.",
+      showOrientationControlsProperty,
+      SLOT(updateShowRollControls()),
+      this
     )
   ),
   poseProperty(
     new rviz::Property(
       "Pose",
       "",
-      "The pose of the TF Marker.",
+      "The pose of the TF marker.",
       this
     )
   ),
@@ -105,7 +204,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
       ros::message_traits::datatype<geometry_msgs::PoseStamped>(),
       "geometry_msgs::PoseStamped topic to publish on.",
       poseProperty,
-      SLOT(updatePoseTopic()),
+      SLOT(updateTopic()),
       this
     )
   ),
@@ -113,7 +212,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::TfFrameProperty(
       "Frame",
       rviz::TfFrameProperty::FIXED_FRAME_STRING,
-      "TF frame into which the TF Marker's pose is transformed before being "
+      "TF frame into which the TF marker's pose is transformed before being "
         "published.",
       poseProperty,
       0,
@@ -126,7 +225,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::VectorProperty(
       "Position",
       Ogre::Vector3::ZERO,
-      "Position of the TF Marker in the specified TF frame.",
+      "Position of the TF marker in the specified TF frame.",
       poseProperty,
       SLOT(updatePosition()),
       this
@@ -136,7 +235,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::Property(
       "Orientation",
       "",
-      "Orientation of the TF Marker in the specified TF frame.",
+      "Orientation of the TF marker in the specified TF frame.",
       poseProperty
     )
   ),
@@ -144,7 +243,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::Property(
       "Euler Angles",
       "",
-      "Euler angle orientation of the TF Marker in the specified TF frame.",
+      "Euler angle orientation of the TF marker in the specified TF frame.",
       orientationProperty
     )
   ),
@@ -152,7 +251,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::VectorProperty(
       "Degrees",
       Ogre::Vector3::ZERO,
-      "Euler angle orientation of the TF Marker in the specified TF frame "
+      "Euler angle orientation of the TF marker in the specified TF frame "
         "in [deg].",
       eulerProperty,
       SLOT(updateEulerDeg()),
@@ -163,7 +262,7 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::VectorProperty(
       "Radians",
       Ogre::Vector3::ZERO,
-      "Euler angle orientation of the TF Marker in the specified TF frame "
+      "Euler angle orientation of the TF marker in the specified TF frame "
         "in [rad].",
       eulerProperty,
       SLOT(updateEulerRad()),
@@ -174,13 +273,20 @@ TFMarkerDisplay::TFMarkerDisplay() :
     new rviz::QuaternionProperty(
       "Quaternion",
       Ogre::Quaternion::IDENTITY,
-      "Quaternion orientation of the TF Marker in the specified TF frame.",
+      "Quaternion orientation of the TF marker in the specified TF frame.",
       orientationProperty,
       SLOT(updateQuaternion()),
       this
     )
   ),
+  tfListener(tfBuffer),
+  frame(rviz::TfFrameProperty::FIXED_FRAME_STRING),
   block(false) {
+  showDescriptionProperty->setDisableChildrenIfFalse(true);
+  showCrosshairProperty->setDisableChildrenIfFalse(true);
+  showControlsProperty->setDisableChildrenIfFalse(true);
+  showPositionControlsProperty->setDisableChildrenIfFalse(true);
+  showOrientationControlsProperty->setDisableChildrenIfFalse(true);
 }
 
 TFMarkerDisplay::~TFMarkerDisplay() {
@@ -200,10 +306,11 @@ void TFMarkerDisplay::setName(const QString& name) {
 /*****************************************************************************/
 
 void TFMarkerDisplay::onInitialize() {
+  frameProperty->setFrameManager(context_->getFrameManager());
   Ogre::ResourceGroupManager::getSingleton().createResourceGroup(
     "rviz_tf_marker");
   
-  marker.reset(new TFMarker(context_, getSceneNode()));
+  marker.reset(new TFMarker(context_, getSceneNode(), this));
   
   marker->setDescription(getName());
 
@@ -211,12 +318,19 @@ void TFMarkerDisplay::onInitialize() {
   updateShowAxes();
   updateShowCrosshair();
   updateCrosshairColor();
-  updateShowVisualAids();
+  updateShowControls();
+  
+  updateTopic();
   updatePose();
+  
+  emit initialized();
 }
 
 void TFMarkerDisplay::onEnable() {
+  updateShowDescription();
   updateShowAxes();
+  updateShowCrosshair();
+  updateShowControls();
 }
 
 void TFMarkerDisplay::onDisable() {
@@ -226,7 +340,128 @@ void TFMarkerDisplay::reset() {
   Display::reset();
 }
 
+bool TFMarkerDisplay::transform(const geometry_msgs::PoseStamped& message, 
+    geometry_msgs::PoseStamped& transformedMessage, const QString&
+    targetFrame) {
+  geometry_msgs::PoseStamped msg = message;
+  std::string tf = targetFrame.toStdString();
+  
+  if (msg.header.frame_id ==
+      rviz::TfFrameProperty::FIXED_FRAME_STRING.toStdString())
+    msg.header.frame_id = context_->getFrameManager()->getFixedFrame();
+  if (tf == rviz::TfFrameProperty::FIXED_FRAME_STRING.toStdString())
+    tf = context_->getFrameManager()->getFixedFrame();
+  
+  try {
+    tfBuffer.transform(msg, transformedMessage, tf);
+  }
+  catch (tf2::TransformException& exception) {
+    ROS_WARN("Failed to lookup transform from [%s] to [%s]: %s",
+      msg.header.frame_id.c_str(), tf.c_str(), exception.what());
+    
+    return false;
+  }
+  
+  return true;
+}
+
 void TFMarkerDisplay::publish(const geometry_msgs::PoseStamped& message) {
+  if (publisher)
+    publisher.publish(message);
+}
+
+void TFMarkerDisplay::fromMessage(const geometry_msgs::PoseStamped& message) {
+  Ogre::Vector3 position(
+    message.pose.position.x,
+    message.pose.position.y,
+    message.pose.position.z
+  );  
+  Ogre::Quaternion quaternion(
+    message.pose.orientation.w,
+    message.pose.orientation.x,
+    message.pose.orientation.y,
+    message.pose.orientation.z
+  );
+  Ogre::Vector3 eulerRad, eulerDeg;
+  quaternionToEulerRad(quaternion, eulerRad);
+  quaternionToEulerDeg(quaternion, eulerDeg);
+  
+  frameProperty->setValue(message.header.frame_id.c_str());  
+  positionProperty->setVector(position);
+  eulerRadProperty->setVector(eulerRad);
+  eulerDegProperty->setVector(eulerDeg);
+  quaternionProperty->setQuaternion(quaternion);
+}
+
+void TFMarkerDisplay::toMessage(geometry_msgs::PoseStamped& message, const
+    ros::Time& stamp) {
+  message.header.stamp = stamp;
+  message.header.frame_id = frameProperty->getFrameStd();
+  if (message.header.frame_id ==
+      rviz::TfFrameProperty::FIXED_FRAME_STRING.toStdString())
+    message.header.frame_id = context_->getFrameManager()->getFixedFrame();
+  
+  Ogre::Vector3 position = positionProperty->getVector();
+  message.pose.position.x = position[0];
+  message.pose.position.y = position[1];
+  message.pose.position.z = position[2];
+  
+  Ogre::Quaternion orientation = quaternionProperty->getQuaternion();
+  message.pose.orientation.w = orientation[0];
+  message.pose.orientation.x = orientation[1];
+  message.pose.orientation.y = orientation[2];
+  message.pose.orientation.z = orientation[3];
+}
+
+void TFMarkerDisplay::quaternionToEulerRad(const Ogre::Quaternion& quaternion,
+    Ogre::Vector3& eulerRad) {
+  Ogre::Matrix3 matrix = Ogre::Matrix3::IDENTITY;
+  quaternion.ToRotationMatrix(matrix);
+  
+  Ogre::Radian yaw, pitch, roll;
+  matrix.ToEulerAnglesZYX(yaw, pitch, roll);
+  
+  eulerRad[0] = roll.valueRadians();
+  eulerRad[1] = pitch.valueRadians();
+  eulerRad[2] = yaw.valueRadians();
+}
+
+void TFMarkerDisplay::quaternionToEulerDeg(const Ogre::Quaternion& quaternion,
+    Ogre::Vector3& eulerDeg) {
+  Ogre::Vector3 eulerRad;
+  
+  quaternionToEulerRad(quaternion, eulerRad);
+  eulerRadToEulerDeg(eulerRad, eulerDeg);
+}
+
+void TFMarkerDisplay::eulerRadToQuaternion(const Ogre::Vector3& eulerRad,
+    Ogre::Quaternion& quaternion) {
+  Ogre::Matrix3 matrix = Ogre::Matrix3::IDENTITY;
+  matrix.FromEulerAnglesZYX(
+    Ogre::Radian(eulerRad[2]), 
+    Ogre::Radian(eulerRad[1]),
+    Ogre::Radian(eulerRad[0])
+  );
+  
+  quaternion.FromRotationMatrix(matrix);
+}
+
+void TFMarkerDisplay::eulerDegToQuaternion(const Ogre::Vector3& eulerDeg,
+    Ogre::Quaternion& quaternion) {
+  Ogre::Vector3 eulerRad;
+  
+  eulerDegToEulerRad(eulerDeg, eulerRad);
+  eulerRadToQuaternion(eulerRad, quaternion);
+}
+
+void TFMarkerDisplay::eulerRadToEulerDeg(const Ogre::Vector3& eulerRad,
+    Ogre::Vector3& eulerDeg) {
+  eulerDeg = eulerRad*180.0/Ogre::Math::HALF_PI;
+}
+
+void TFMarkerDisplay::eulerDegToEulerRad(const Ogre::Vector3& eulerDeg,
+    Ogre::Vector3& eulerRad) {
+  eulerRad = eulerDeg*Ogre::Math::HALF_PI/180.0;
 }
 
 /*****************************************************************************/
@@ -235,6 +470,10 @@ void TFMarkerDisplay::publish(const geometry_msgs::PoseStamped& message) {
 
 void TFMarkerDisplay::updateShowDescription() {
   marker->setShowDescription(showDescriptionProperty->getBool());
+}
+
+void TFMarkerDisplay::updateDescriptionColor() {
+  marker->setDescriptionColor(descriptionColorProperty->getColor());
 }
 
 void TFMarkerDisplay::updateShowAxes() {
@@ -249,37 +488,129 @@ void TFMarkerDisplay::updateCrosshairColor() {
   marker->setCrosshairColor(crosshairColorProperty->getColor());
 }
 
-void TFMarkerDisplay::updateShowVisualAids() {
-  marker->setShowVisualAids(showVisualAidsProperty->getBool());
+void TFMarkerDisplay::updateShowControls() {
+  marker->setShowControls(showControlsProperty->getBool());
+  
+  updateShowPositionControls();
+  updateShowOrientationControls();
+}
+
+void TFMarkerDisplay::updateShowPositionControls() {
+  marker->setShowPositionControls(
+    showControlsProperty->getBool() &&
+    showPositionControlsProperty->getBool()
+  );
+  
+  updateShowXControls();
+  updateShowYControls();
+  updateShowZControls();
+}
+
+void TFMarkerDisplay::updateShowXControls() {
+  marker->setShowXControls(
+    showControlsProperty->getBool() &&
+    showPositionControlsProperty->getBool() &&
+    showXControlsProperty->getBool()
+  );
+}
+
+void TFMarkerDisplay::updateShowYControls() {
+  marker->setShowYControls(
+    showControlsProperty->getBool() &&
+    showPositionControlsProperty->getBool() &&
+    showYControlsProperty->getBool()
+  );
+}
+
+void TFMarkerDisplay::updateShowZControls() {
+  marker->setShowZControls(
+    showControlsProperty->getBool() &&
+    showPositionControlsProperty->getBool() &&
+    showZControlsProperty->getBool()
+  );
+}
+
+void TFMarkerDisplay::updateShowOrientationControls() {
+  marker->setShowOrientationControls(
+    showControlsProperty->getBool() &&
+    showOrientationControlsProperty->getBool()
+  );
+
+  updateShowYawControls();
+  updateShowPitchControls();
+  updateShowRollControls();
+}
+
+void TFMarkerDisplay::updateShowYawControls() {
+  marker->setShowYawControls(
+    showControlsProperty->getBool() &&
+    showOrientationControlsProperty->getBool() &&
+    showYawControlsProperty->getBool()
+  );
+}
+
+void TFMarkerDisplay::updateShowPitchControls() {
+  marker->setShowPitchControls(
+    showControlsProperty->getBool() &&
+    showOrientationControlsProperty->getBool() &&
+    showPitchControlsProperty->getBool()
+  );
+}
+
+void TFMarkerDisplay::updateShowRollControls() {
+  marker->setShowRollControls(
+    showControlsProperty->getBool() &&
+    showOrientationControlsProperty->getBool() &&
+    showRollControlsProperty->getBool()
+  );
 }
 
 void TFMarkerDisplay::updatePose() {
   if (!block) {
-    geometry_msgs::PoseStamped message;
+    geometry_msgs::PoseStamped message, transformedMessage;
     
-    message.header.stamp = ros::Time::now();
-    message.header.frame_id = frameProperty->getFrame().toStdString();
+    toMessage(message);
     
-    Ogre::Vector3 position = positionProperty->getVector();
-    message.pose.position.x = position[0];
-    message.pose.position.y = position[1];
-    message.pose.position.z = position[2];
+    if (!message.header.frame_id.empty()) {
+      if (transform(message, transformedMessage,
+          rviz::TfFrameProperty::FIXED_FRAME_STRING))
+        marker->setPose(transformedMessage.pose);
+    }
+    else
+      marker->setPose(message.pose);
     
-    Ogre::Quaternion orientation = quaternionProperty->getQuaternion();
-    message.pose.orientation.w = orientation[0];
-    message.pose.orientation.x = orientation[1];
-    message.pose.orientation.y = orientation[2];
-    message.pose.orientation.z = orientation[3];
-    
-    marker->setPose(message);
     publish(message);
   }
 }
 
-void TFMarkerDisplay::updatePoseTopic() {
+void TFMarkerDisplay::updateTopic() {
+  if (publisher)
+    publisher.shutdown();
+  
+  if (!topicProperty->getTopic().isEmpty())
+    publisher = update_nh_.advertise<geometry_msgs::PoseStamped>(
+      topicProperty->getTopicStd(), 1);
+    
+  updatePose();
 }
 
 void TFMarkerDisplay::updateFrame() {
+  if (!block) {
+    if (frame != frameProperty->getFrame()) {
+      geometry_msgs::PoseStamped message, transformedMessage;
+      
+      toMessage(message);
+      message.header.frame_id = frame.toStdString();
+      frame = frameProperty->getFrame();
+      
+      if (transform(message, transformedMessage, frame)) {
+        block = true;
+        fromMessage(transformedMessage);
+        block = false;
+      }
+    }
+  }
+  
   updatePose();
 }
 
@@ -290,16 +621,12 @@ void TFMarkerDisplay::updatePosition() {
 void TFMarkerDisplay::updateEulerDeg() {
   if (!block) {  
     Ogre::Vector3 eulerDeg = eulerDegProperty->getVector();
-    Ogre::Vector3 eulerRad = eulerDeg*Ogre::Math::HALF_PI/180.0;
-
-    Ogre::Matrix3 matrix = Ogre::Matrix3::IDENTITY;
-    matrix.FromEulerAnglesZYX(
-      Ogre::Radian(eulerRad[2]), 
-      Ogre::Radian(eulerRad[1]),
-      Ogre::Radian(eulerRad[0])
-    );
-    Ogre::Quaternion quaternion(matrix);
+    Ogre::Vector3 eulerRad;
+    Ogre::Quaternion quaternion;
     
+    eulerDegToEulerRad(eulerDeg, eulerRad);
+    eulerRadToQuaternion(eulerRad, quaternion);
+
     block = true;
     eulerRadProperty->setVector(eulerRad);
     quaternionProperty->setQuaternion(quaternion);
@@ -312,15 +639,11 @@ void TFMarkerDisplay::updateEulerDeg() {
 void TFMarkerDisplay::updateEulerRad() {
   if (!block) {  
     Ogre::Vector3 eulerRad = eulerRadProperty->getVector();
-    Ogre::Vector3 eulerDeg = eulerRad*180.0/Ogre::Math::HALF_PI;
+    Ogre::Vector3 eulerDeg;
+    Ogre::Quaternion quaternion;
     
-    Ogre::Matrix3 matrix = Ogre::Matrix3::IDENTITY;
-    matrix.FromEulerAnglesXYZ(
-      Ogre::Radian(eulerRad[0]), 
-      Ogre::Radian(eulerRad[1]),
-      Ogre::Radian(eulerRad[2])
-    );
-    Ogre::Quaternion quaternion(matrix);
+    eulerRadToEulerDeg(eulerRad, eulerDeg);
+    eulerRadToQuaternion(eulerRad, quaternion);
     
     block = true;
     eulerDegProperty->setVector(eulerDeg);
@@ -334,18 +657,10 @@ void TFMarkerDisplay::updateEulerRad() {
 void TFMarkerDisplay::updateQuaternion() {
   if (!block) {
     Ogre::Quaternion quaternion = quaternionProperty->getQuaternion();
-    Ogre::Matrix3 matrix = Ogre::Matrix3::IDENTITY;
-    quaternion.ToRotationMatrix(matrix);
+    Ogre::Vector3 eulerRad, eulerDeg;
     
-    Ogre::Radian yaw, pitch, roll;
-    matrix.ToEulerAnglesZYX(yaw, pitch, roll);
-    
-    Ogre::Vector3 eulerRad(
-      roll.valueRadians(),
-      pitch.valueRadians(),
-      yaw.valueRadians()
-    );
-    Ogre::Vector3 eulerDeg = eulerRad*180.0/Ogre::Math::HALF_PI;
+    quaternionToEulerRad(quaternion, eulerRad);
+    eulerRadToEulerDeg(eulerRad, eulerDeg);
     
     block = true;
     eulerDegProperty->setVector(eulerDeg);

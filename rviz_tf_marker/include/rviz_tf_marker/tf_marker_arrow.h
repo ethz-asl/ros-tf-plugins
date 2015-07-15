@@ -16,61 +16,43 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
  ******************************************************************************/
 
-#ifndef TF_MARKER_CROSSHAIR_H
-#define TF_MARKER_CROSSHAIR_H
+#ifndef TF_MARKER_ARROW_H
+#define TF_MARKER_ARROW_H
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-
-#include <OgreMaterial.h>
-#include <OgreSceneManager.h>
+#include <OgreQuaternion.h>
+#include <OgreVector3.h>
 #endif
 
-#include <QColor>
-#include <QObject>
-#include <QString>
+#include <rviz_tf_marker/tf_marker_control.h>
 
 namespace Ogre {
-  class Entity;
   class SceneNode;
-  class Viewport;
 };
 
-namespace rviz {  
+namespace rviz {
+  class Arrow;
   class DisplayContext;
 };
 
 namespace rviz_tf_marker {
-  class TFMarkerCrosshair :
-    public QObject,
-    public Ogre::SceneManager::Listener,
-    public boost::enable_shared_from_this<TFMarkerCrosshair> {
+  class TFMarkerArrow :
+    public TFMarkerControl {
   Q_OBJECT
   public:
-    TFMarkerCrosshair(rviz::DisplayContext* context,
-      Ogre::SceneNode* parentNode, const QString&
-      resource = "package://rviz_tf_marker/resource/crosshair.stl",
-      double scale = 1.0, const QColor& color = Qt::white);
-    virtual ~TFMarkerCrosshair();
-
-    Ogre::SceneNode* getSceneNode();
-    void setResource(const QString& resource);
-    void setScale(double scale);
-    void setColor(const QColor& color);
-  
+    TFMarkerArrow(rviz::DisplayContext* context, Ogre::SceneNode*
+      parentNode, TFMarker* parent, const Ogre::Quaternion&
+      orientation = Ogre::Quaternion::IDENTITY, const Ogre::Vector3&
+      scale = Ogre::Vector3(0.4, 0.3, 0.3), double offset = 0.5,
+      const QString& hint = "<b>Left-Click:</b> Move.");
+    virtual ~TFMarkerArrow();
+    
+    void setOrientation(const Ogre::Quaternion& orientation);
+    void setScale(const Ogre::Vector3& scale);
+    void setOffset(double offset);
+    
   protected:
-    rviz::DisplayContext* context;
-    Ogre::SceneNode* sceneNode;
-    Ogre::Entity* entity;
-    Ogre::MaterialPtr material;
-    
-    QString resource;
-    double scale;
-    
-    void preFindVisibleObjects(Ogre::SceneManager* source,
-      Ogre::SceneManager::IlluminationRenderStage irs,
-      Ogre::Viewport* v);
+    rviz::Arrow* arrow;
   };
 };
 

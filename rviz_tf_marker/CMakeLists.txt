@@ -10,6 +10,7 @@ find_package(catkin REQUIRED
     tf2
     tf2_msgs
     tf2_ros
+    tf2_geometry_msgs
     roscpp
     rviz
 )
@@ -20,18 +21,22 @@ include(${QT_USE_FILE})
 
 set(rviz_tf_marker_SRCS
   src/tf_marker.cpp
+  src/tf_marker_arrow.cpp
   src/tf_marker_control.cpp
   src/tf_marker_crosshair.cpp
   src/tf_marker_description.cpp
+  src/tf_marker_disc.cpp
   src/tf_marker_display.cpp
 )
 
 set(rviz_tf_marker_HDRS
-  include/tf_marker.h
-  include/tf_marker_control.h
-  include/tf_marker_crosshair.h
-  include/tf_marker_description.h
-  include/tf_marker_display.h
+  include/rviz_tf_marker/tf_marker.h
+  include/rviz_tf_marker/tf_marker_arrow.h
+  include/rviz_tf_marker/tf_marker_control.h
+  include/rviz_tf_marker/tf_marker_crosshair.h
+  include/rviz_tf_marker/tf_marker_description.h
+  include/rviz_tf_marker/tf_marker_disc.h
+  include/rviz_tf_marker/tf_marker_display.h
 )
 
 set(rviz_tf_marker_INCLUDE_DIRECTORIES

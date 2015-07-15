@@ -24,6 +24,7 @@
 #include <boost/enable_shared_from_this.hpp>
 #endif
 
+#include <QColor>
 #include <QObject>
 #include <QString>
 
@@ -43,18 +44,21 @@ namespace rviz_tf_marker {
   Q_OBJECT
   public:
     TFMarkerDescription(rviz::DisplayContext* context, Ogre::SceneNode*
-      parentNode, double scale = 1.0);
+      parentNode, double scale = 1.0, const QColor& color = Qt::white);
     virtual ~TFMarkerDescription();
 
     Ogre::SceneNode* getSceneNode();
     void setDescription(const QString& description);
+    QString getDescription() const;
     void setScale(double scale);
+    void setColor(const QColor& color);
   
   protected:
     rviz::DisplayContext* context;
     Ogre::SceneNode* sceneNode;
     rviz::MovableText* text;
     
+    QColor color;
     double scale;
   };
 };

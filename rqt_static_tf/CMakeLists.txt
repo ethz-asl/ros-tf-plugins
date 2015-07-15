@@ -27,7 +27,7 @@ set(rqt_static_tf_SRCS
 )
 
 set(rqt_static_tf_HDRS
-  include/static_tf_plugin.h
+  include/rqt_static_tf/static_tf_plugin.h
 )
 
 set(rqt_static_tf_UIS

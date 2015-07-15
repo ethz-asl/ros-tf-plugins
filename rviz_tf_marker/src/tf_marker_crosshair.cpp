@@ -16,6 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
  ******************************************************************************/
 
+#include <sstream>
+
 #include <OgreEntity.h>
 #include <OgreSceneNode.h>
 
@@ -25,8 +27,7 @@
 #include <rviz/mesh_loader.h>
 #include <rviz/properties/parse_color.h>
 
-#include "tf_marker_crosshair.h"
-#include <boost/concept_check.hpp>
+#include "rviz_tf_marker/tf_marker_crosshair.h"
 
 namespace rviz_tf_marker {
 
@@ -71,6 +72,8 @@ void TFMarkerCrosshair::setResource(const QString& resource) {
     if (!rviz::loadMeshFromResource(resource.toStdString()).isNull()) {
       entity = context->getSceneManager()->createEntity("crosshair",
         resource.toStdString());
+      
+      setColor(color);
       sceneNode->attachObject(entity);
     }
     else
@@ -84,27 +87,35 @@ void TFMarkerCrosshair::setScale(double scale) {
 }
 
 void TFMarkerCrosshair::setColor(const QColor& color) {
-  if (material.isNull()) {
-    material = Ogre::MaterialManager::getSingleton().create(
-      "crosshair_material", "rviz_tf_marker");
-    material->setReceiveShadows(false);
-    material->getTechnique(0)->setLightingEnabled(true);
+  this->color = color;
+  
+  if (entity) {
+    if (material.isNull()) {
+      static size_t count = 0;
+      std::stringstream stream;
+      stream << "crosshair_material_" << count++;
+      
+      material = Ogre::MaterialManager::getSingleton().create(
+        stream.str(), "rviz_tf_marker");
+      material->setReceiveShadows(false);
+      material->getTechnique(0)->setLightingEnabled(true);
+      
+      entity->setMaterialName(material->getName());
+    }
     
-    entity->setMaterialName(material->getName());
-  }
-  
-  Ogre::ColourValue colour = rviz::qtToOgre(color);
-  
-  material->getTechnique(0)->setAmbient(colour*0.5);
-  material->getTechnique(0)->setDiffuse(colour);
+    Ogre::ColourValue colour = rviz::qtToOgre(color);
+    
+    material->getTechnique(0)->setAmbient(colour*0.5);
+    material->getTechnique(0)->setDiffuse(colour);
 
-  if (colour.a < 0.9998) {
-    material->getTechnique(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-    material->getTechnique(0)->setDepthWriteEnabled(false);
-  }
-  else {
-    material->getTechnique(0)->setSceneBlending(Ogre::SBT_REPLACE);
-    material->getTechnique(0)->setDepthWriteEnabled(true);
+    if (colour.a < 0.9998) {
+      material->getTechnique(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+      material->getTechnique(0)->setDepthWriteEnabled(false);
+    }
+    else {
+      material->getTechnique(0)->setSceneBlending(Ogre::SBT_REPLACE);
+      material->getTechnique(0)->setDepthWriteEnabled(true);
+    }
   }
 }
 
