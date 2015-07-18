@@ -41,6 +41,8 @@ namespace rviz {
 };
 
 namespace rviz_tf_marker {
+  class TFMarker;
+  
   class TFMarkerCrosshair :
     public QObject,
     public Ogre::SceneManager::Listener,
@@ -48,7 +50,7 @@ namespace rviz_tf_marker {
   Q_OBJECT
   public:
     TFMarkerCrosshair(rviz::DisplayContext* context,
-      Ogre::SceneNode* parentNode, const QString&
+      Ogre::SceneNode* parentNode, TFMarker* parent, const QString&
       resource = "package://rviz_tf_marker/resource/crosshair.stl",
       double scale = 1.0, const QColor& color = Qt::white);
     virtual ~TFMarkerCrosshair();
@@ -56,11 +58,13 @@ namespace rviz_tf_marker {
     Ogre::SceneNode* getSceneNode();
     void setResource(const QString& resource);
     void setScale(double scale);
-    void setColor(const QColor& color);
+    void setColor(const QColor& color, bool transparent = true);
   
   protected:
     rviz::DisplayContext* context;
     Ogre::SceneNode* sceneNode;
+    TFMarker* parent;
+    
     Ogre::Entity* entity;
     Ogre::MaterialPtr material;
     
@@ -71,6 +75,9 @@ namespace rviz_tf_marker {
     void preFindVisibleObjects(Ogre::SceneManager* source,
       Ogre::SceneManager::IlluminationRenderStage irs,
       Ogre::Viewport* v);
+    
+  protected slots:
+    void parentTransparencyEnabled(bool enabled);
   };
 };
 

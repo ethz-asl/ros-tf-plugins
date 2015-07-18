@@ -27,6 +27,7 @@
 #include <rviz/mesh_loader.h>
 #include <rviz/properties/parse_color.h>
 
+#include "rviz_tf_marker/tf_marker.h"
 #include "rviz_tf_marker/tf_marker_crosshair.h"
 
 namespace rviz_tf_marker {
@@ -36,12 +37,16 @@ namespace rviz_tf_marker {
 /*****************************************************************************/
 
 TFMarkerCrosshair::TFMarkerCrosshair(rviz::DisplayContext* context,
-    Ogre::SceneNode* parentNode, const QString& resource, double scale,
-    const QColor& color) :
+    Ogre::SceneNode* parentNode, TFMarker* parent, const QString&
+    resource, double scale, const QColor& color) :
   context(context),
   sceneNode(parentNode->createChildSceneNode()),
+  parent(parent),
   entity(0),
   scale(1.0) {
+  connect(parent, SIGNAL(transparencyEnabled(bool)), this,
+    SLOT(parentTransparencyEnabled(bool)));
+  
   setResource(resource);
   setScale(scale);
   setColor(color);
@@ -86,7 +91,7 @@ void TFMarkerCrosshair::setScale(double scale) {
   sceneNode->setScale(scale, scale, scale);
 }
 
-void TFMarkerCrosshair::setColor(const QColor& color) {
+void TFMarkerCrosshair::setColor(const QColor& color, bool transparent) {
   this->color = color;
   
   if (entity) {
@@ -108,7 +113,7 @@ void TFMarkerCrosshair::setColor(const QColor& color) {
     material->getTechnique(0)->setAmbient(colour*0.5);
     material->getTechnique(0)->setDiffuse(colour);
 
-    if (colour.a < 0.9998) {
+    if (transparent && (colour.a < 0.9998)) {
       material->getTechnique(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
       material->getTechnique(0)->setDepthWriteEnabled(false);
     }
@@ -133,12 +138,15 @@ void TFMarkerCrosshair::preFindVisibleObjects(Ogre::SceneManager* source,
     v->getCamera()->getDerivedUp());
   Ogre::Quaternion rotateAroundX = Ogre::Quaternion(Ogre::Radian(0.0),
     v->getCamera()->getDerivedDirection());
-  Ogre::Quaternion rotation = sceneNode->getParentSceneNode()->
+  Ogre::Quaternion orientation = sceneNode->getParentSceneNode()->
     convertWorldToLocalOrientation(rotateAroundX*alignYZRotation*
     xViewFacingRotation);
 
-  sceneNode->setOrientation(rotation);
-  sceneNode->_update(true, false);
+  sceneNode->setOrientation(orientation);
+}
+
+void TFMarkerCrosshair::parentTransparencyEnabled(bool enabled) {
+  setColor(color, enabled);
 }
 
 }

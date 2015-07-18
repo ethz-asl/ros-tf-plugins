@@ -23,7 +23,7 @@
 #include <rviz/selection/selection_manager.h>
 
 #include "rviz_tf_marker/tf_marker.h"
-#include "rviz_tf_marker/tf_marker_arrow.h"
+#include "rviz_tf_marker/tf_marker_arrows.h"
 #include "rviz_tf_marker/tf_marker_crosshair.h"
 #include "rviz_tf_marker/tf_marker_description.h"
 #include "rviz_tf_marker/tf_marker_disc.h"
@@ -39,25 +39,21 @@ TFMarker::TFMarker(rviz::DisplayContext* context, Ogre::SceneNode*
     parentNode, TFMarkerDisplay* parent) :
   context(context),
   sceneNode(parentNode->createChildSceneNode()),
+  referenceNode(0),
   controlsNode(sceneNode->createChildSceneNode()),
   positionControlsNode(controlsNode->createChildSceneNode()),
   orientationControlsNode(controlsNode->createChildSceneNode()),
   parent(parent),
   axes(new rviz::Axes(context->getSceneManager(), sceneNode, 1, 0.05)),
-  description(new TFMarkerDescription(context, sceneNode)),
-  crosshair(new TFMarkerCrosshair(context, sceneNode)),
-  positiveXControl(new TFMarkerArrow(context, positionControlsNode, this,
+  description(new TFMarkerDescription(context, sceneNode, this,
+    parent->getName())),
+  crosshair(new TFMarkerCrosshair(context, sceneNode, this)),
+  xControl(new TFMarkerArrows(context, positionControlsNode, this,
     Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::UNIT_X))),
-  negativeXControl(new TFMarkerArrow(context, positionControlsNode, this,
-    Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::NEGATIVE_UNIT_X))),
-  positiveYControl(new TFMarkerArrow(context, positionControlsNode, this,
+  yControl(new TFMarkerArrows(context, positionControlsNode, this,
     Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::UNIT_Y))),
-  negativeYControl(new TFMarkerArrow(context, positionControlsNode, this,
-    Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::NEGATIVE_UNIT_Y))),
-  positiveZControl(new TFMarkerArrow(context, positionControlsNode, this,
+  zControl(new TFMarkerArrows(context, positionControlsNode, this,
     Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::UNIT_Z))),
-  negativeZControl(new TFMarkerArrow(context, positionControlsNode, this,
-    Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::NEGATIVE_UNIT_Z))),
    yawControl(new TFMarkerDisc(context, orientationControlsNode, this,
     "disc_yaw", Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::UNIT_Z))),
    pitchControl(new TFMarkerDisc(context, orientationControlsNode, this,
@@ -65,31 +61,41 @@ TFMarker::TFMarker(rviz::DisplayContext* context, Ogre::SceneNode*
    rollControl(new TFMarkerDisc(context, orientationControlsNode, this,
     "disc_roll", Ogre::Vector3::UNIT_X.getRotationTo(Ogre::Vector3::UNIT_X))) {
   connect(parent, SIGNAL(initialized()), this, SLOT(parentInitialized()));
-     
-  crosshair->setScale(0.75);
+  connect(parent, SIGNAL(nameChanged(const QString&)), this,
+    SLOT(parentNameChanged(const QString&)));
+  
+  crosshair->setScale(0.7);
 }
 
 TFMarker::~TFMarker() {
   delete axes;
+  
   context->getSceneManager()->destroySceneNode(sceneNode);
+  if (referenceNode)
+    context->getSceneManager()->destroySceneNode(referenceNode);
 }
 
 /*****************************************************************************/
 /* Accessors                                                                 */
 /*****************************************************************************/
 
-void TFMarker::setDescription(const QString& description) {
+Ogre::SceneNode* TFMarker::getSceneNode() {
+  return sceneNode;
+}
+
+Ogre::SceneNode* TFMarker::getReferenceNode() {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  this->description->setDescription(description);
-
-  emit descriptionChanged(description);
+  if (referenceNode)
+    return referenceNode;
+  else
+    return sceneNode;
 }
 
 QString TFMarker::getDescription() const {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  return description->getDescription();
+  return description->getText();
 }
 
 void TFMarker::setDescriptionColor(const QColor& color) {
@@ -137,22 +143,19 @@ void TFMarker::setShowPositionControls(bool show) {
 void TFMarker::setShowXControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  positiveXControl->getSceneNode()->setVisible(show);
-  negativeXControl->getSceneNode()->setVisible(show);
+  xControl->setVisible(show);
 }
 
 void TFMarker::setShowYControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  positiveYControl->getSceneNode()->setVisible(show);
-  negativeYControl->getSceneNode()->setVisible(show);
+  yControl->setVisible(show);
 }
 
 void TFMarker::setShowZControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  positiveZControl->getSceneNode()->setVisible(show);
-  negativeZControl->getSceneNode()->setVisible(show);
+  zControl->setVisible(show);
 }
 
 void TFMarker::setShowOrientationControls(bool show) {
@@ -162,26 +165,38 @@ void TFMarker::setShowOrientationControls(bool show) {
 void TFMarker::setShowYawControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  yawControl->getSceneNode()->setVisible(show);
+  yawControl->setVisible(show);
 }
 
 void TFMarker::setShowPitchControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  pitchControl->getSceneNode()->setVisible(show);
+  pitchControl->setVisible(show);
 }
 
 void TFMarker::setShowRollControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-  rollControl->getSceneNode()->setVisible(show);
+  rollControl->setVisible(show);
+}
+
+void TFMarker::setShowVisualAids(bool show) {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+  emit visualAidsShown(show);
 }
 
 void TFMarker::setPose(const Ogre::Vector3& position, const Ogre::Quaternion&
     orientation) {
-  sceneNode->setPosition(position);
+  boost::recursive_mutex::scoped_lock lock(mutex);
   
-  axes->getSceneNode()->setOrientation(orientation);
+  sceneNode->setPosition(position);
+  sceneNode->setOrientation(orientation);
+//   this->position = position;
+//   this->orientation = orientation;
+//   moving = true;
+
+  emit poseChanged(position, orientation);
 }
 
 void TFMarker::setPose(const geometry_msgs::Pose& message) {
@@ -202,11 +217,69 @@ void TFMarker::setPose(const geometry_msgs::Pose& message) {
 }
 
 /*****************************************************************************/
+/* Methods                                                                   */
+/*****************************************************************************/
+
+void TFMarker::enableTransparency(bool enable) {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+
+  emit transparencyEnabled(enable);
+}
+
+void TFMarker::translate(Ogre::Vector3 translation) {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+//   setPose(position+translation, orientation);
+  setPose(sceneNode->getPosition()+translation, sceneNode->getOrientation());
+}
+
+void TFMarker::rotate(Ogre::Quaternion rotation) {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+//   setPose(position, rotation*orientation);
+  setPose(sceneNode->getPosition(), rotation*sceneNode->getOrientation());
+}
+
+void TFMarker::startDragging() {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+  if (!referenceNode) {
+    referenceNode = sceneNode->getParentSceneNode()->createChildSceneNode();
+    
+    referenceNode->setPosition(sceneNode->getPosition());
+    referenceNode->setOrientation(sceneNode->getOrientation());
+  }
+  
+//   dragging = true;
+//   moving = false;
+}
+
+void TFMarker::stopDragging() {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+  if (referenceNode) {
+    context->getSceneManager()->destroySceneNode(referenceNode);
+    referenceNode = 0;
+  }
+  
+//   dragging = false;
+}
+
+void TFMarker::updatePose() {
+}
+
+/*****************************************************************************/
 /* Slots                                                                     */
 /*****************************************************************************/
 
 void TFMarker::parentInitialized() {
   emit initialized();
+}
+
+void TFMarker::parentNameChanged(const QString& name) {
+  description->setText(name);
+  
+  emit descriptionChanged(name);
 }
 
 }

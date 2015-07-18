@@ -24,7 +24,7 @@
 #include <rviz/ogre_helpers/shape.h>
 #include <rviz/properties/parse_color.h>
 
-#include "rviz_tf_marker/tf_marker_arrow.h"
+#include "rviz_tf_marker/tf_marker_arrows.h"
 
 namespace rviz_tf_marker {
 
@@ -32,47 +32,57 @@ namespace rviz_tf_marker {
 /* Constructors and Destructor                                               */
 /*****************************************************************************/
 
-TFMarkerArrow::TFMarkerArrow(rviz::DisplayContext* context, Ogre::SceneNode*
+TFMarkerArrows::TFMarkerArrows(rviz::DisplayContext* context, Ogre::SceneNode*
     parentNode, TFMarker* parent, const Ogre::Quaternion& orientation, const
-    Ogre::Vector3& scale, double offset, const QString& hint) :
-  TFMarkerControl(context, parentNode, parent, hint),
-  arrow(new rviz::Arrow(context->getSceneManager(), sceneNode)) {
+    Ogre::Vector3& scale, double distance, const QString& hint) :
+  TFMarkerControl(context, parentNode, parent, true, false, hint),
+  positiveArrow(new rviz::Arrow(context->getSceneManager(), sceneNode)),
+  negativeArrow(new rviz::Arrow(context->getSceneManager(), sceneNode)) {
   cursor = rviz::makeIconCursor("package://rviz/icons/move1d.svg");
   
-  arrow->setOrientation(Ogre::Vector3::NEGATIVE_UNIT_Z.getRotationTo(
+  positiveArrow->setOrientation(Ogre::Vector3::NEGATIVE_UNIT_Z.getRotationTo(
     Ogre::Vector3::UNIT_X));
-  arrow->set(0.5, 0.5, 0.5, 1.0);
+  positiveArrow->set(0.5, 0.6, 0.5, 1.0);
   
-  addMaterial(arrow->getShaft()->getMaterial());
-  addMaterial(arrow->getHead()->getMaterial());
+  negativeArrow->setOrientation(Ogre::Vector3::NEGATIVE_UNIT_Z.getRotationTo(
+    Ogre::Vector3::NEGATIVE_UNIT_X));
+  negativeArrow->set(0.5, 0.6, 0.5, 1.0);
   
   setOrientation(orientation);
   setScale(scale);
-  setOffset(offset);
+  setDistance(distance);
+  
+  addMaterial(positiveArrow->getShaft()->getMaterial());
+  addMaterial(positiveArrow->getHead()->getMaterial());
+  addMaterial(negativeArrow->getShaft()->getMaterial());
+  addMaterial(negativeArrow->getHead()->getMaterial());  
 }
 
-TFMarkerArrow::~TFMarkerArrow() {
+TFMarkerArrows::~TFMarkerArrows() {
 }
 
 /*****************************************************************************/
 /* Accessors                                                                 */
 /*****************************************************************************/
 
-void TFMarkerArrow::setOrientation(const Ogre::Quaternion& orientation) {
+void TFMarkerArrows::setOrientation(const Ogre::Quaternion& orientation) {
   QColor color;
   orientationToColor(orientation, color);
   
   sceneNode->setOrientation(orientation);
-  arrow->setColor(rviz::qtToOgre(color));
+  
+  positiveArrow->setColor(rviz::qtToOgre(color));
+  negativeArrow->setColor(rviz::qtToOgre(color));
 }
 
-void TFMarkerArrow::setScale(const Ogre::Vector3& scale) {
-  sceneNode->setScale(arrow->getOrientation().Inverse()*scale);
+void TFMarkerArrows::setScale(const Ogre::Vector3& scale) {
+  positiveArrow->setScale(scale);
+  negativeArrow->setScale(scale);
 }
 
-void TFMarkerArrow::setOffset(double offset) {
-  sceneNode->setPosition(sceneNode->getOrientation()*
-    Ogre::Vector3(offset, 0.0, 0.0));
+void TFMarkerArrows::setDistance(double distance) {
+  positiveArrow->setPosition(Ogre::Vector3(0.5*distance, 0.0, 0.0));
+  negativeArrow->setPosition(Ogre::Vector3(-0.5*distance, 0.0, 0.0));
 }
 
 }

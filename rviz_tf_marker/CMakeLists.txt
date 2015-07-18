@@ -21,7 +21,7 @@ include(${QT_USE_FILE})
 
 set(rviz_tf_marker_SRCS
   src/tf_marker.cpp
-  src/tf_marker_arrow.cpp
+  src/tf_marker_arrows.cpp
   src/tf_marker_control.cpp
   src/tf_marker_crosshair.cpp
   src/tf_marker_description.cpp
@@ -31,7 +31,7 @@ set(rviz_tf_marker_SRCS
 
 set(rviz_tf_marker_HDRS
   include/rviz_tf_marker/tf_marker.h
-  include/rviz_tf_marker/tf_marker_arrow.h
+  include/rviz_tf_marker/tf_marker_arrows.h
   include/rviz_tf_marker/tf_marker_control.h
   include/rviz_tf_marker/tf_marker_crosshair.h
   include/rviz_tf_marker/tf_marker_description.h

@@ -38,6 +38,7 @@
 namespace rviz {
   class BoolProperty;
   class ColorProperty;
+  class FloatProperty;
   class Property;
   class QuaternionProperty;
   class RosTopicProperty;
@@ -59,6 +60,7 @@ namespace rviz_tf_marker {
     
   signals:
     void initialized();
+    void nameChanged(const QString& name);
   
   protected:
     rviz::BoolProperty* showDescriptionProperty;
@@ -66,6 +68,7 @@ namespace rviz_tf_marker {
     rviz::BoolProperty* showAxesProperty;
     rviz::BoolProperty* showCrosshairProperty;
     rviz::ColorProperty* crosshairColorProperty;
+    rviz::FloatProperty* crosshairAlphaProperty;
     rviz::BoolProperty* showControlsProperty;
     rviz::BoolProperty* showPositionControlsProperty;
     rviz::BoolProperty* showXControlsProperty;
@@ -75,6 +78,8 @@ namespace rviz_tf_marker {
     rviz::BoolProperty* showYawControlsProperty;
     rviz::BoolProperty* showPitchControlsProperty;
     rviz::BoolProperty* showRollControlsProperty;
+    rviz::BoolProperty* showVisualAidsProperty;
+    rviz::BoolProperty* enableTransparencyProperty;
     rviz::Property* poseProperty;
     rviz::RosTopicProperty* topicProperty;
     rviz::TfFrameProperty* frameProperty;
@@ -128,6 +133,7 @@ namespace rviz_tf_marker {
     void updateShowAxes();
     void updateShowCrosshair();
     void updateCrosshairColor();
+    void updateCrosshairAlpha();
     void updateShowControls();
     void updateShowPositionControls();
     void updateShowXControls();
@@ -137,6 +143,8 @@ namespace rviz_tf_marker {
     void updateShowYawControls();
     void updateShowPitchControls();
     void updateShowRollControls();
+    void updateShowVisualAids();
+    void updateEnableTransparency();
     void updatePose();
     void updateTopic();
     void updateFrame();

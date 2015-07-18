@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <OgreColourValue.h>
+#include <OgreMaterial.h>
 #include <OgreQuaternion.h>
 #include <OgreVector3.h>
 #endif
@@ -53,20 +54,22 @@ namespace rviz_tf_marker {
     
     void setOrientation(const Ogre::Quaternion& orientation);
     void setScale(const Ogre::Vector3& scale);
+    void setTransparent(bool transparent);
     
   protected:
     Ogre::ManualObject* manualObject;
+    Ogre::MaterialPtr material;
     
     double radius;
     size_t numSegments;
+    bool transparent;
     
     void makeCircle(std::vector<Ogre::Vector3>& vertices, double radius,
       size_t numSegments);
     void makeDisc(std::vector<Ogre::Vector3>& vertices,
-      std::vector<Ogre::ColourValue>& colors, const Ogre::Quaternion&
-      orientation, double innerRadius, double outerRadius, size_t
-      numSegments);
-    void updateObject(const Ogre::Quaternion& orientation);
+      std::vector<Ogre::ColourValue>& colors, double innerRadius, double
+      outerRadius, size_t numSegments, const QColor& color);
+    void updateObject(const Ogre::Quaternion& orientation, bool transparent);
   };
 };
 

@@ -22,6 +22,7 @@
 #include <rviz/frame_manager.h>
 #include <rviz/properties/bool_property.h>
 #include <rviz/properties/color_property.h>
+#include <rviz/properties/float_property.h>
 #include <rviz/properties/property.h>
 #include <rviz/properties/quaternion_property.h>
 #include <rviz/properties/ros_topic_property.h>
@@ -91,6 +92,16 @@ TFMarkerDisplay::TFMarkerDisplay() :
       "Crosshair color of the TF marker.",
       showCrosshairProperty,
       SLOT(updateCrosshairColor()),
+      this
+    )
+  ),
+  crosshairAlphaProperty(
+    new rviz::FloatProperty(
+      "Alpha",
+      0.5,
+      "Amount of transparency to apply to the crosshair of the TF marker.",
+      showCrosshairProperty,
+      SLOT(updateCrosshairAlpha()),
       this
     )
   ),
@@ -189,6 +200,25 @@ TFMarkerDisplay::TFMarkerDisplay() :
       this
     )
   ),
+  showVisualAidsProperty(
+    new rviz::BoolProperty(
+      "Show Visual Aids",
+      false,
+      "Whether or not to show visual helpers while moving/rotating the "
+        "TF Marker.",
+      this,
+      SLOT(updateShowVisualAids())
+    )
+  ),
+  enableTransparencyProperty(
+    new rviz::BoolProperty(
+      "Enable Transparency",
+      true,
+      "Whether or not to allow transparency for the TF marker.",
+      this,
+      SLOT(updateEnableTransparency())
+    )
+  ),
   poseProperty(
     new rviz::Property(
       "Pose",
@@ -284,6 +314,8 @@ TFMarkerDisplay::TFMarkerDisplay() :
   block(false) {
   showDescriptionProperty->setDisableChildrenIfFalse(true);
   showCrosshairProperty->setDisableChildrenIfFalse(true);
+  crosshairAlphaProperty->setMin(0.0);
+  crosshairAlphaProperty->setMax(1.0);
   showControlsProperty->setDisableChildrenIfFalse(true);
   showPositionControlsProperty->setDisableChildrenIfFalse(true);
   showOrientationControlsProperty->setDisableChildrenIfFalse(true);
@@ -298,7 +330,8 @@ TFMarkerDisplay::~TFMarkerDisplay() {
 
 void TFMarkerDisplay::setName(const QString& name) {
   Display::setName(name);
-  marker->setDescription(name);
+  
+  emit nameChanged(name);
 }
 
 /*****************************************************************************/
@@ -312,18 +345,19 @@ void TFMarkerDisplay::onInitialize() {
   
   marker.reset(new TFMarker(context_, getSceneNode(), this));
   
-  marker->setDescription(getName());
-
   updateShowDescription();
   updateShowAxes();
   updateShowCrosshair();
   updateCrosshairColor();
-  updateShowControls();
+  updateShowControls();  
+  updateShowVisualAids();
+  updateEnableTransparency();
   
   updateTopic();
   updatePose();
   
   emit initialized();
+  emit nameChanged(getName());
 }
 
 void TFMarkerDisplay::onEnable() {
@@ -331,6 +365,8 @@ void TFMarkerDisplay::onEnable() {
   updateShowAxes();
   updateShowCrosshair();
   updateShowControls();
+  updateShowVisualAids();
+  updateEnableTransparency();
 }
 
 void TFMarkerDisplay::onDisable() {
@@ -485,7 +521,17 @@ void TFMarkerDisplay::updateShowCrosshair() {
 }
 
 void TFMarkerDisplay::updateCrosshairColor() {
-  marker->setCrosshairColor(crosshairColorProperty->getColor());
+  QColor color = crosshairColorProperty->getColor();  
+  color.setAlphaF(crosshairAlphaProperty->getFloat());
+  
+  marker->setCrosshairColor(color);
+}
+
+void TFMarkerDisplay::updateCrosshairAlpha() {
+  QColor color = crosshairColorProperty->getColor();
+  color.setAlphaF(crosshairAlphaProperty->getFloat());
+  
+  marker->setCrosshairColor(color);
 }
 
 void TFMarkerDisplay::updateShowControls() {
@@ -563,6 +609,14 @@ void TFMarkerDisplay::updateShowRollControls() {
     showOrientationControlsProperty->getBool() &&
     showRollControlsProperty->getBool()
   );
+}
+
+void TFMarkerDisplay::updateShowVisualAids() {
+  marker->setShowVisualAids(showVisualAidsProperty->getBool());
+}
+
+void TFMarkerDisplay::updateEnableTransparency() {
+  marker->enableTransparency(enableTransparencyProperty->getBool());
 }
 
 void TFMarkerDisplay::updatePose() {

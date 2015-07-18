@@ -45,7 +45,7 @@ namespace rviz {
 };
 
 namespace rviz_tf_marker {
-  class TFMarkerArrow;
+  class TFMarkerArrows;
   class TFMarkerCrosshair;
   class TFMarkerDescription;
   class TFMarkerDisplay;
@@ -55,14 +55,14 @@ namespace rviz_tf_marker {
     public QObject,
     public boost::enable_shared_from_this<TFMarker> {
   Q_OBJECT
+  friend class TFMarkerControl;
   public:
     TFMarker(rviz::DisplayContext* context, Ogre::SceneNode* parentNode,
       TFMarkerDisplay* parent);
     virtual ~TFMarker();
 
-    void setDescription(const QString& description);
+    Ogre::SceneNode* getSceneNode();
     QString getDescription() const;
-    
     void setShowDescription(bool show);
     void setDescriptionColor(const QColor& color);
     void setShowAxes(bool show);
@@ -77,32 +77,44 @@ namespace rviz_tf_marker {
     void setShowYawControls(bool show);
     void setShowPitchControls(bool show);
     void setShowRollControls(bool show);
+    void setShowVisualAids(bool show);
     void setPose(const Ogre::Vector3& position, const Ogre::Quaternion&
       orientation);
     void setPose(const geometry_msgs::Pose& message);
+
+    void enableTransparency(bool enable);
+    
+    void translate(Ogre::Vector3 translation);
+    void rotate(Ogre::Quaternion rotation);
   
   signals:
     void initialized();
     void descriptionChanged(const QString& description);
+    void visualAidsShown(bool shown);
+    void transparencyEnabled(bool enabled);
+    void poseChanged(const Ogre::Vector3& position, const
+      Ogre::Quaternion& orientation);
   
   protected:
     rviz::DisplayContext* context;
     Ogre::SceneNode* sceneNode;
+    Ogre::SceneNode* referenceNode;
     Ogre::SceneNode* controlsNode;
     Ogre::SceneNode* positionControlsNode;
     Ogre::SceneNode* orientationControlsNode;
     TFMarkerDisplay* parent;
     
+//     Ogre::Vector3 position;
+//     Ogre::Quaternion orientation;
+//     bool dragging;
+    
     rviz::Axes* axes;
     boost::shared_ptr<TFMarkerDescription> description;
     boost::shared_ptr<TFMarkerCrosshair> crosshair;
     
-    boost::shared_ptr<TFMarkerArrow> positiveXControl;
-    boost::shared_ptr<TFMarkerArrow> negativeXControl;
-    boost::shared_ptr<TFMarkerArrow> positiveYControl;
-    boost::shared_ptr<TFMarkerArrow> negativeYControl;
-    boost::shared_ptr<TFMarkerArrow> positiveZControl;
-    boost::shared_ptr<TFMarkerArrow> negativeZControl;
+    boost::shared_ptr<TFMarkerArrows> xControl;
+    boost::shared_ptr<TFMarkerArrows> yControl;
+    boost::shared_ptr<TFMarkerArrows> zControl;
     
     boost::shared_ptr<TFMarkerDisc> yawControl;
     boost::shared_ptr<TFMarkerDisc> pitchControl;
@@ -110,8 +122,16 @@ namespace rviz_tf_marker {
     
     mutable boost::recursive_mutex mutex;
     
+    Ogre::SceneNode* getReferenceNode();
+    
+    void startDragging();
+    void stopDragging();
+    
+    void updatePose();
+    
   protected slots:
     void parentInitialized();
+    void parentNameChanged(const QString& name);
   };
 };
 

@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
  ******************************************************************************/
 
-#ifndef TF_MARKER_ARROW_H
-#define TF_MARKER_ARROW_H
+#ifndef TF_MARKER_ARROWS_H
+#define TF_MARKER_ARROWS_H
 
 #ifndef Q_MOC_RUN
 #include <OgreQuaternion.h>
@@ -36,23 +36,24 @@ namespace rviz {
 };
 
 namespace rviz_tf_marker {
-  class TFMarkerArrow :
+  class TFMarkerArrows :
     public TFMarkerControl {
   Q_OBJECT
   public:
-    TFMarkerArrow(rviz::DisplayContext* context, Ogre::SceneNode*
+    TFMarkerArrows(rviz::DisplayContext* context, Ogre::SceneNode*
       parentNode, TFMarker* parent, const Ogre::Quaternion&
       orientation = Ogre::Quaternion::IDENTITY, const Ogre::Vector3&
-      scale = Ogre::Vector3(0.4, 0.3, 0.3), double offset = 0.5,
+      scale = Ogre::Vector3(0.4, 0.25, 0.25), double distance = 1.0,
       const QString& hint = "<b>Left-Click:</b> Move.");
-    virtual ~TFMarkerArrow();
+    virtual ~TFMarkerArrows();
     
     void setOrientation(const Ogre::Quaternion& orientation);
     void setScale(const Ogre::Vector3& scale);
-    void setOffset(double offset);
+    void setDistance(double distance);
     
   protected:
-    rviz::Arrow* arrow;
+    rviz::Arrow* positiveArrow;
+    rviz::Arrow* negativeArrow;
   };
 };
 
