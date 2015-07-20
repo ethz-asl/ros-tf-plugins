@@ -48,13 +48,15 @@ namespace rviz_tf_marker {
       parentNode, TFMarker* parent, const QString& name, const
       Ogre::Quaternion& orientation = Ogre::Quaternion::IDENTITY,
       const Ogre::Vector3& scale = Ogre::Vector3::UNIT_SCALE,
-      double radius = 0.66, size_t numSegments = 36, const QString&
-      hint = "<b>Left-Click:</b> Move/Rotate.");
+      double radius = 0.66, size_t numSegments = 36, bool
+      translationEnabled = true);
     virtual ~TFMarkerDisc();
     
     void setOrientation(const Ogre::Quaternion& orientation);
     void setScale(const Ogre::Vector3& scale);
     void setTransparent(bool transparent);
+    
+    void enableTranslation(bool enable);
     
   protected:
     Ogre::ManualObject* manualObject;

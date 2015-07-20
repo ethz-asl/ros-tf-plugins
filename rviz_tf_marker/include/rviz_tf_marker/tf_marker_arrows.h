@@ -43,8 +43,7 @@ namespace rviz_tf_marker {
     TFMarkerArrows(rviz::DisplayContext* context, Ogre::SceneNode*
       parentNode, TFMarker* parent, const Ogre::Quaternion&
       orientation = Ogre::Quaternion::IDENTITY, const Ogre::Vector3&
-      scale = Ogre::Vector3(0.4, 0.25, 0.25), double distance = 1.0,
-      const QString& hint = "<b>Left-Click:</b> Move.");
+      scale = Ogre::Vector3(0.4, 0.25, 0.25), double distance = 1.0);
     virtual ~TFMarkerArrows();
     
     void setOrientation(const Ogre::Quaternion& orientation);

@@ -38,6 +38,7 @@
 namespace rviz {
   class BoolProperty;
   class ColorProperty;
+  class EnumProperty;
   class FloatProperty;
   class Property;
   class QuaternionProperty;
@@ -57,6 +58,7 @@ namespace rviz_tf_marker {
     virtual ~TFMarkerDisplay();
     
     void setName(const QString& name);
+    QString getFixedFrame() const;
     
   signals:
     void initialized();
@@ -76,8 +78,11 @@ namespace rviz_tf_marker {
     rviz::BoolProperty* showZControlsProperty;
     rviz::BoolProperty* showOrientationControlsProperty;
     rviz::BoolProperty* showYawControlsProperty;
+    rviz::EnumProperty* yawControlModeProperty;
     rviz::BoolProperty* showPitchControlsProperty;
+    rviz::EnumProperty* pitchControlModeProperty;
     rviz::BoolProperty* showRollControlsProperty;
+    rviz::EnumProperty* rollControlModeProperty;
     rviz::BoolProperty* showVisualAidsProperty;
     rviz::BoolProperty* enableTransparencyProperty;
     rviz::Property* poseProperty;
@@ -89,6 +94,7 @@ namespace rviz_tf_marker {
     rviz::VectorProperty* eulerDegProperty;
     rviz::VectorProperty* eulerRadProperty;
     rviz::QuaternionProperty* quaternionProperty;
+    rviz::BoolProperty* trackUpdatesProperty;
     
     boost::shared_ptr<TFMarker> marker;
     
@@ -111,6 +117,10 @@ namespace rviz_tf_marker {
     void publish(const geometry_msgs::PoseStamped& message);
     
     void fromMessage(const geometry_msgs::PoseStamped& message);
+    void toMessage(geometry_msgs::PoseStamped& message,
+      const Ogre::Vector3& position, const Ogre::Quaternion&
+      orientation, const QString& frame, const ros::Time&
+      stamp = ros::Time::now());
     void toMessage(geometry_msgs::PoseStamped& message,
       const ros::Time& stamp = ros::Time::now());
     
@@ -141,8 +151,11 @@ namespace rviz_tf_marker {
     void updateShowZControls();
     void updateShowOrientationControls();
     void updateShowYawControls();
+    void updateYawControlMode();
     void updateShowPitchControls();
+    void updatePitchControlMode();
     void updateShowRollControls();
+    void updateRollControlMode();
     void updateShowVisualAids();
     void updateEnableTransparency();
     void updatePose();
@@ -152,6 +165,11 @@ namespace rviz_tf_marker {
     void updateEulerDeg();
     void updateEulerRad();
     void updateQuaternion();
+    void updateTrackUpdates();
+    
+    void markerPoseChanged(const Ogre::Vector3& position, const
+      Ogre::Quaternion& orientation);
+    void markerDraggingStopped();
   };
 };
 

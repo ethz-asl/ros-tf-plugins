@@ -168,16 +168,34 @@ void TFMarker::setShowYawControls(bool show) {
   yawControl->setVisible(show);
 }
 
+void TFMarker::setYawMode(Mode mode) {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+  yawControl->enableTranslation(mode == modeMoveRotate);
+}
+
 void TFMarker::setShowPitchControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
   pitchControl->setVisible(show);
 }
 
+void TFMarker::setPitchMode(Mode mode) {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+  pitchControl->enableTranslation(mode == modeMoveRotate);
+}
+
 void TFMarker::setShowRollControls(bool show) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
   rollControl->setVisible(show);
+}
+
+void TFMarker::setRollMode(Mode mode) {
+  boost::recursive_mutex::scoped_lock lock(mutex);
+  
+  rollControl->enableTranslation(mode == modeMoveRotate);
 }
 
 void TFMarker::setShowVisualAids(bool show) {
@@ -192,9 +210,6 @@ void TFMarker::setPose(const Ogre::Vector3& position, const Ogre::Quaternion&
   
   sceneNode->setPosition(position);
   sceneNode->setOrientation(orientation);
-//   this->position = position;
-//   this->orientation = orientation;
-//   moving = true;
 
   emit poseChanged(position, orientation);
 }
@@ -229,14 +244,12 @@ void TFMarker::enableTransparency(bool enable) {
 void TFMarker::translate(Ogre::Vector3 translation) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-//   setPose(position+translation, orientation);
   setPose(sceneNode->getPosition()+translation, sceneNode->getOrientation());
 }
 
 void TFMarker::rotate(Ogre::Quaternion rotation) {
   boost::recursive_mutex::scoped_lock lock(mutex);
   
-//   setPose(position, rotation*orientation);
   setPose(sceneNode->getPosition(), rotation*sceneNode->getOrientation());
 }
 
@@ -248,10 +261,9 @@ void TFMarker::startDragging() {
     
     referenceNode->setPosition(sceneNode->getPosition());
     referenceNode->setOrientation(sceneNode->getOrientation());
+    
+    emit draggingStarted();
   }
-  
-//   dragging = true;
-//   moving = false;
 }
 
 void TFMarker::stopDragging() {
@@ -260,12 +272,9 @@ void TFMarker::stopDragging() {
   if (referenceNode) {
     context->getSceneManager()->destroySceneNode(referenceNode);
     referenceNode = 0;
+    
+    emit draggingStopped();
   }
-  
-//   dragging = false;
-}
-
-void TFMarker::updatePose() {
 }
 
 /*****************************************************************************/

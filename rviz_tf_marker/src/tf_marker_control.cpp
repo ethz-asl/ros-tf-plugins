@@ -325,46 +325,29 @@ void TFMarkerControl::translateRotate(const Ogre::Ray& mouseRay, const
   Ogre::Vector2 intersection2D;
   double rayLength;
   
-//   Ogre::Vector3 dragPosition = T*grabPosition;
-//   Ogre::Vector3 rotationCenter = T*this->rotationCenter;
-//   Ogre::Vector3 rotationAxis = T*this->rotationAxis;
-//   Ogre::Vector3 grabPosition = T*this->grabPosition;
-//   Ogre::Vector3 rotationCenter = T*this->rotationCenter;
-
   if (intersectSomeYZPlane(mouseRay, rotationCenter,
-      parent->getReferenceNode()->convertLocalToWorldOrientation(
+      sceneNode->getParent()->convertLocalToWorldOrientation(
       sceneNode->getOrientation()), newDragPosition, intersection2D,
       rayLength)) {
-    Ogre::Vector3 previousCenter = parent->getReferenceNode()->
-      convertWorldToLocalPosition(previousDragPosition-rotationCenter);
-    Ogre::Vector3 newCenter = parent->getReferenceNode()->
-      convertWorldToLocalPosition(newDragPosition-rotationCenter);
+    Ogre::Vector3 previousCenter = previousDragPosition-rotationCenter;
+    Ogre::Vector3 newCenter = newDragPosition-rotationCenter;
   
     if (newCenter.length() > Ogre::Matrix3::EPSILON) {
-      Ogre::Vector3 relativeRotationAxis = parent->getReferenceNode()->
-        convertWorldToLocalPosition(rotationAxis);
+      Ogre::Vector3 translation = newCenter*
+        (1.0-previousCenter.length()/newCenter.length());
+      Ogre::Quaternion rotation = previousCenter.getRotationTo(
+        newCenter, rotationAxis);
       
-      Ogre::Quaternion relativeRotation = previousCenter.getRotationTo(
-        newCenter, relativeRotationAxis);
-      Ogre::Radian angle, relativeAngle;
-      Ogre::Vector3 axis;
-      
-      relativeRotation.ToAngleAxis(angle, axis);
-      relativeAngle = angle*axis.dotProduct(relativeRotationAxis);
-      
-//       parent->setPose(
-//         parent->getSceneNode()->getPosition(),
-//         parent->getReferenceNode()->getParent()->
-//           convertWorldToLocalOrientation(relativeRotation*
-//           parent->getReferenceNode()->getParent()->
-//           convertLocalToWorldOrientation(
-//           parent->getSceneNode()->getOrientation()))
-//       );
-      
-      parent->rotate(relativeRotation);
-//       parent->translate(parent->getSceneNode()->getParent()->
-//         convertWorldToLocalPosition(newCenter*
-//         (1.0-previousCenter.length()/newCenter.length())));
+      parent->setPose(
+        parent->getSceneNode()->getParent()->convertWorldToLocalPosition(
+          parent->getReferenceNode()->getParent()->
+          convertLocalToWorldPosition(
+          parent->getReferenceNode()->getPosition())+translation),
+        parent->getSceneNode()->getParent()->convertWorldToLocalOrientation(
+          rotation*parent->getReferenceNode()->getParent()->
+          convertLocalToWorldOrientation(
+          parent->getReferenceNode()->getOrientation()))
+      );
     }
   }
 }

@@ -41,8 +41,8 @@ namespace rviz_tf_marker {
 TFMarkerDisc::TFMarkerDisc(rviz::DisplayContext* context, Ogre::SceneNode*
     parentNode, TFMarker* parent, const QString& name, const Ogre::Quaternion&
     orientation, const Ogre::Vector3& scale, double radius, size_t
-    numSegments, const QString& hint) :
-  TFMarkerControl(context, parentNode, parent, false, true, hint),
+    numSegments, bool translationEnabled) :
+  TFMarkerControl(context, parentNode, parent, false, true),
   manualObject(context->getSceneManager()->createManualObject(
     name.toStdString())),
   radius(radius),
@@ -54,6 +54,7 @@ TFMarkerDisc::TFMarkerDisc(rviz::DisplayContext* context, Ogre::SceneNode*
   
   setOrientation(orientation);
   setScale(scale);
+  enableTranslation(translationEnabled);
 }
 
 TFMarkerDisc::~TFMarkerDisc() {
@@ -77,6 +78,17 @@ void TFMarkerDisc::setTransparent(bool transparent) {
   TFMarkerControl::setTransparent(transparent);
   
   this->transparent = transparent;
+  updateObject(sceneNode->getOrientation(), transparent);
+}
+
+void TFMarkerDisc::enableTranslation(bool enable) {
+  translationEnabled = enable;
+  
+  if (enable)
+    hint = "<b>Left-Click:</b> Move/Rotate.";
+  else
+    hint = "<b>Left-Click:</b> Rotate.";
+  
   updateObject(sceneNode->getOrientation(), transparent);
 }
 

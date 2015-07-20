@@ -57,6 +57,12 @@ namespace rviz_tf_marker {
   Q_OBJECT
   friend class TFMarkerControl;
   public:
+    enum Mode {
+      modeMove,
+      modeRotate,
+      modeMoveRotate
+    };
+    
     TFMarker(rviz::DisplayContext* context, Ogre::SceneNode* parentNode,
       TFMarkerDisplay* parent);
     virtual ~TFMarker();
@@ -75,8 +81,11 @@ namespace rviz_tf_marker {
     void setShowZControls(bool show);
     void setShowOrientationControls(bool show);
     void setShowYawControls(bool show);
+    void setYawMode(Mode mode);
     void setShowPitchControls(bool show);
+    void setPitchMode(Mode mode);
     void setShowRollControls(bool show);
+    void setRollMode(Mode mode);
     void setShowVisualAids(bool show);
     void setPose(const Ogre::Vector3& position, const Ogre::Quaternion&
       orientation);
@@ -92,8 +101,10 @@ namespace rviz_tf_marker {
     void descriptionChanged(const QString& description);
     void visualAidsShown(bool shown);
     void transparencyEnabled(bool enabled);
+    void draggingStarted();
     void poseChanged(const Ogre::Vector3& position, const
       Ogre::Quaternion& orientation);
+    void draggingStopped();
   
   protected:
     rviz::DisplayContext* context;
@@ -103,10 +114,6 @@ namespace rviz_tf_marker {
     Ogre::SceneNode* positionControlsNode;
     Ogre::SceneNode* orientationControlsNode;
     TFMarkerDisplay* parent;
-    
-//     Ogre::Vector3 position;
-//     Ogre::Quaternion orientation;
-//     bool dragging;
     
     rviz::Axes* axes;
     boost::shared_ptr<TFMarkerDescription> description;
@@ -126,8 +133,6 @@ namespace rviz_tf_marker {
     
     void startDragging();
     void stopDragging();
-    
-    void updatePose();
     
   protected slots:
     void parentInitialized();

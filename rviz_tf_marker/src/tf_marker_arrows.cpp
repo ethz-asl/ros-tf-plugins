@@ -34,8 +34,9 @@ namespace rviz_tf_marker {
 
 TFMarkerArrows::TFMarkerArrows(rviz::DisplayContext* context, Ogre::SceneNode*
     parentNode, TFMarker* parent, const Ogre::Quaternion& orientation, const
-    Ogre::Vector3& scale, double distance, const QString& hint) :
-  TFMarkerControl(context, parentNode, parent, true, false, hint),
+    Ogre::Vector3& scale, double distance) :
+  TFMarkerControl(context, parentNode, parent, true, false,
+    "<b>Left-Click:</b> Move."),
   positiveArrow(new rviz::Arrow(context->getSceneManager(), sceneNode)),
   negativeArrow(new rviz::Arrow(context->getSceneManager(), sceneNode)) {
   cursor = rviz::makeIconCursor("package://rviz/icons/move1d.svg");
