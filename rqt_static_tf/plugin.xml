@@ -9,7 +9,7 @@
       <group>
         <label>TF</label>
         <icon type="theme">folder</icon>
-        <statustip>Plugins related to ROS TF frames</statustip>
+        <statustip>Plugins related to ROS TF frames.</statustip>
       </group>
       <label>Static TF</label>
       <statustip>
