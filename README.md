@@ -25,13 +25,19 @@ working with ROS TF frames:
 - [tf2](http://wiki.ros.org/tf2)
 
   ```
-  sudo apt-get install ros-indigo-tf2-ros
+  sudo apt-get install ros-indigo-tf2-ros ros-indigo-tf2-geometry-msgs
   ```
  
 - [rqt](http://wiki.ros.org/rqt)
 
   ```
   sudo apt-get install ros-indigo-rqt
+  ```
+ 
+- [rviz](http://wiki.ros.org/rviz)
+
+  ```
+  sudo apt-get install ros-indigo-rviz
   ```
  
 ### Building
