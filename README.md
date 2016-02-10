@@ -2,8 +2,15 @@
 
 ## Overview
 
-**Author(s): Ralf Kaestner</br>
-Affiliation: Autonomous Systems Lab, ETH Zurich**
+**Author(s):** Ralf Kaestner
+
+**Maintainer:** Ralf Kaestner <ralf.kaestner@gmail.com>
+
+**Licsense:** GNU Lesser General Public License (LGPL)
+
+**Operating system(s):** Debian-based Linux, Mac OS X
+
+**Package PPA:** Not available
 
 ## Content
 
@@ -24,19 +31,19 @@ working with ROS TF frames:
 
 - [tf2](http://wiki.ros.org/tf2)
 
-  ```
+  ```shell
   sudo apt-get install ros-indigo-tf2-ros ros-indigo-tf2-geometry-msgs
   ```
  
 - [rqt](http://wiki.ros.org/rqt)
 
-  ```
+  ```shell
   sudo apt-get install ros-indigo-rqt
   ```
  
 - [rviz](http://wiki.ros.org/rviz)
 
-  ```
+  ```shell
   sudo apt-get install ros-indigo-rviz
   ```
  
@@ -44,13 +51,13 @@ working with ROS TF frames:
 
 Create a symlink in your catkin source folder, e.g.:
 
-  ```
+  ```shell
   ln -s ~/git/ros-tf-plugins ~/catkin_ws/src
   ```
 
 If you just need certain componenets of the GUI:
 
-  ```
+  ```shell
   ln -s ~/git/ros-tf-plugins/name_of_the_component ~/catkin_ws/src
   ```
 
@@ -60,13 +67,13 @@ If you just need certain componenets of the GUI:
 
 To launch the standalone rqt plugin, run
 
-  ```
+  ```shell
   rosrun rqt_static_tf rqt_static_tf
   ```
 
 To launch the rqt GUI without a perspective, run
 
-  ```
+  ```shell
   rqt --force-discover
   ```
 
@@ -74,7 +81,7 @@ This will discover all plugins, which can then be loaded manually.
 
 To delete the default configuration files (in case of problems):
 
-  ```
+  ```shell
   rqt --clear-config
   ```
 
@@ -82,7 +89,7 @@ To delete the default configuration files (in case of problems):
 
 To launch rviz and discover the plugin, run
 
-  ```
+  ```shell
   rosrun rviz rviz
   ```
 
