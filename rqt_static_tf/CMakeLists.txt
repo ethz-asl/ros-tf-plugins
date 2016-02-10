@@ -42,7 +42,7 @@ set(rqt_static_tf_INCLUDE_DIRECTORIES
 catkin_package(
   LIBRARIES
     rqt_static_tf
-  CATKIN_DEPENDS 
+  CATKIN_DEPENDS
     tf2
     tf2_msgs
     tf2_ros
@@ -61,14 +61,14 @@ include_directories(
 )
 
 add_library(rqt_static_tf
-  ${rqt_static_tf_SRCS} 
+  ${rqt_static_tf_SRCS}
   ${rqt_static_tf_MOCS}
   ${rqt_static_tf_UIS_H}
 )
 
 target_link_libraries(rqt_static_tf
   ${catkin_LIBRARIES}
-  ${QT_LIBRARIES} 
+  ${QT_LIBRARIES}
 )
 
 find_package(class_loader)

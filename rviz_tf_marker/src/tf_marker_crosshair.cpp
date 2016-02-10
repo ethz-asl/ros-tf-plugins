@@ -19,6 +19,7 @@
 #include <sstream>
 
 #include <OgreEntity.h>
+#include <OgreMaterialManager.h>
 #include <OgreSceneNode.h>
 
 #include <ros/ros.h>
@@ -46,11 +47,11 @@ TFMarkerCrosshair::TFMarkerCrosshair(rviz::DisplayContext* context,
   scale(1.0) {
   connect(parent, SIGNAL(transparencyEnabled(bool)), this,
     SLOT(parentTransparencyEnabled(bool)));
-  
+
   setResource(resource);
   setScale(scale);
   setColor(color);
-  
+
   context->getSceneManager()->addListener(this);
 }
 
@@ -72,12 +73,12 @@ void TFMarkerCrosshair::setResource(const QString& resource) {
     context->getSceneManager()->destroyEntity(entity);
     entity = 0;
   }
-  
+
   if (!resource.isEmpty()) {
     if (!rviz::loadMeshFromResource(resource.toStdString()).isNull()) {
       entity = context->getSceneManager()->createEntity("crosshair",
         resource.toStdString());
-      
+
       setColor(color);
       sceneNode->attachObject(entity);
     }
@@ -93,23 +94,23 @@ void TFMarkerCrosshair::setScale(double scale) {
 
 void TFMarkerCrosshair::setColor(const QColor& color, bool transparent) {
   this->color = color;
-  
+
   if (entity) {
     if (material.isNull()) {
       static size_t count = 0;
       std::stringstream stream;
       stream << "crosshair_material_" << count++;
-      
+
       material = Ogre::MaterialManager::getSingleton().create(
         stream.str(), "rviz_tf_marker");
       material->setReceiveShadows(false);
       material->getTechnique(0)->setLightingEnabled(true);
-      
+
       entity->setMaterialName(material->getName());
     }
-    
+
     Ogre::ColourValue colour = rviz::qtToOgre(color);
-    
+
     material->getTechnique(0)->setAmbient(colour*0.5);
     material->getTechnique(0)->setDiffuse(colour);
 

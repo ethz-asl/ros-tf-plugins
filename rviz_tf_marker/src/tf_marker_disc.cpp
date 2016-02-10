@@ -20,6 +20,7 @@
 #include <vector>
 
 #include <OgreManualObject.h>
+#include <OgreMaterialManager.h>
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
@@ -49,9 +50,9 @@ TFMarkerDisc::TFMarkerDisc(rviz::DisplayContext* context, Ogre::SceneNode*
   numSegments(numSegments),
   transparent(true) {
   cursor = rviz::makeIconCursor("package://rviz/icons/moverotate.svg");
-  
+
   sceneNode->attachObject(manualObject);
-  
+
   setOrientation(orientation);
   setScale(scale);
   enableTranslation(translationEnabled);
@@ -76,19 +77,19 @@ void TFMarkerDisc::setScale(const Ogre::Vector3& scale) {
 
 void TFMarkerDisc::setTransparent(bool transparent) {
   TFMarkerControl::setTransparent(transparent);
-  
+
   this->transparent = transparent;
   updateObject(sceneNode->getOrientation(), transparent);
 }
 
 void TFMarkerDisc::enableTranslation(bool enable) {
   translationEnabled = enable;
-  
+
   if (enable)
     hint = "<b>Left-Click:</b> Move/Rotate.";
   else
     hint = "<b>Left-Click:</b> Rotate.";
-  
+
   updateObject(sceneNode->getOrientation(), transparent);
 }
 
@@ -99,7 +100,7 @@ void TFMarkerDisc::enableTranslation(bool enable) {
 void TFMarkerDisc::makeCircle(std::vector<Ogre::Vector3>& vertices,
     double radius, size_t numSegments) {
   vertices.resize(numSegments);
-  
+
   for (size_t i = 0; i < numSegments; ++i) {
     double theta = double(i)/double(numSegments)*Ogre::Math::TWO_PI;
 
@@ -113,14 +114,14 @@ void TFMarkerDisc::makeDisc(std::vector<Ogre::Vector3>& vertices,
     std::vector<Ogre::ColourValue>& colors, double innerRadius, double
     outerRadius, size_t numSegments, const QColor& color) {
   vertices.resize(6*numSegments);
-    
+
   std::vector<Ogre::Vector3> innerCircle, outerCircle;
   makeCircle(innerCircle, innerRadius, numSegments);
   makeCircle(outerCircle, outerRadius, numSegments);
-  
+
   if (translationEnabled && rotationEnabled) {
     colors.resize(2*numSegments);
-    
+
     for (size_t i = 0; i < numSegments-1; i += 2) {
       size_t i1 = i;
       size_t i2 = (i+1)%numSegments;
@@ -203,26 +204,26 @@ void TFMarkerDisc::updateObject(const Ogre::Quaternion& orientation, bool
     transparent) {
   QColor color;
   orientationToColor(orientation, color);
-  
+
   std::vector<Ogre::Vector3> vertices;
   std::vector<Ogre::ColourValue> colors;
-  
+
   makeDisc(vertices, colors, 0.75*radius, radius, numSegments, color);
-  
+
   if (material.isNull()) {
     static size_t count = 0;
     std::stringstream stream;
     stream << "disc_material_" << count++;
-    
+
     material = Ogre::MaterialManager::getSingleton().create(stream.str(),
       "rviz_tf_marker");
-    
+
     material->setReceiveShadows(false);
     material->setCullingMode(Ogre::CULL_NONE);
-    
+
     addMaterial(material);
   }
-  
+
   if (transparent && (color.alphaF() < 0.9998)) {
     material->getTechnique(0)->getPass(0)->setSceneBlending(
       Ogre::SBT_TRANSPARENT_ALPHA);
@@ -232,13 +233,13 @@ void TFMarkerDisc::updateObject(const Ogre::Quaternion& orientation, bool
     material->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_REPLACE);
     material->getTechnique(0)->getPass(0)->setDepthWriteEnabled(true);
   }
-  
+
   if (colors.empty()) {
     Ogre::ColourValue colour = rviz::qtToOgre(color);
-    
+
     material->getTechnique(0)->getPass(0)->setAmbient(colour*0.5);
     material->getTechnique(0)->getPass(0)->setDiffuse(colour);
-    
+
     material->getTechnique(0)->getPass(0)->setLightingEnabled(true);
   }
   else
@@ -246,21 +247,21 @@ void TFMarkerDisc::updateObject(const Ogre::Quaternion& orientation, bool
 
 
   selectionHandler->removeTrackedObject(manualObject);
-  
+
   manualObject->clear();
   manualObject->estimateVertexCount(vertices.size());
   manualObject->begin(material->getName(),
     Ogre::RenderOperation::OT_TRIANGLE_LIST);
-  
+
   for(size_t i = 0; i < vertices.size(); i += 3) {
     Ogre::Vector3 normal = (vertices[i+1]-vertices[i]).crossProduct(
       vertices[i+2]-vertices[i]);
     normal.normalise();
-    
+
     for (size_t j = 0; j < 3; ++j) {
       manualObject->position(vertices[i+j]);
       manualObject->normal(normal);
-      
+
       if (!colors.empty()) {
         manualObject->colour(
           colors[i/3].r,
@@ -272,8 +273,8 @@ void TFMarkerDisc::updateObject(const Ogre::Quaternion& orientation, bool
     }
   }
 
-  manualObject->end();  
-  
+  manualObject->end();
+
   selectionHandler->addTrackedObject(manualObject);
 }
 

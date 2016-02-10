@@ -1,70 +1,76 @@
+ros-tf-plugins (0.0.1-12) unstable; urgency=low
+
+  * Fixes related to OS X clang compatibility
+
+ -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 10 Feb 2016 07:42:00 +0100
+
 ros-tf-plugins (0.0.1-11) unstable; urgency=low
 
   * Fixed plugin description
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 20 Jul 2015 13:45:00 +0100
- 
+
 ros-tf-plugins (0.0.1-10) unstable; urgency=low
 
   * Updated README.md
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 20 Jul 2015 09:17:00 +0100
- 
+
 ros-tf-plugins (0.0.1-9) unstable; urgency=low
 
   * Updated README.md
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 20 Jul 2015 09:15:00 +0100
- 
+
 ros-tf-plugins (0.0.1-8) unstable; urgency=low
 
   * First complete version of rviz TF marker
   * Renamed project
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 20 Jul 2015 09:07:00 +0100
- 
+
 ros-tf-plugins (0.0.1-7) unstable; urgency=low
 
   * Another progress commit of rviz TF Marker
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Sat, 18 Jul 2015 07:20:00 +0100
- 
+
 ros-tf-plugins (0.0.1-6) unstable; urgency=low
 
   * Progress commit of rviz TF Marker
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Wed, 15 Jul 2015 21:38:00 +0100
- 
+
 ros-tf-plugins (0.0.1-5) unstable; urgency=low
 
   * First incomplete draft version of rviz TF Marker
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 13 Jul 2015 17:23:00 +0100
- 
+
 ros-tf-plugins (0.0.1-4) unstable; urgency=low
 
   * Increased field precision for translation values
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 29 Jun 2015 16:17:00 +0100
- 
+
 ros-tf-plugins (0.0.1-3) unstable; urgency=low
 
   * Updated README.md
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 29 Jun 2015 16:13:00 +0100
- 
+
 ros-tf-plugins (0.0.1-3) unstable; urgency=low
 
   * Added license file
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 29 Jun 2015 16:12:00 +0100
- 
+
 ros-tf-plugins (0.0.1-2) unstable; urgency=low
 
   * Updated README.md
 
  -- Ralf Kaestner <ralf.kaestner@gmail.com>  Mon, 29 Jun 2015 16:09:00 +0100
- 
+
 ros-tf-plugins (0.0.1-1) unstable; urgency=low
 
   * Initial commit
