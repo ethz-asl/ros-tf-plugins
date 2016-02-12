@@ -55,7 +55,7 @@ Create a symlink in your catkin source folder, e.g.:
   ln -s ~/git/ros-tf-plugins ~/catkin_ws/src
   ```
 
-If you just need certain componenets of the GUI:
+If you just need certain components of the GUI:
 
   ```shell
   ln -s ~/git/ros-tf-plugins/name_of_the_component ~/catkin_ws/src
